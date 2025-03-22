@@ -1,0 +1,20 @@
+plugins {
+  id "application"
+}
+
+repositories {
+  // Use Maven Central for resolving dependencies.
+  mavenCentral()
+}
+
+dependencies {
+  testImplementation "org.junit.jupiter:junit-jupiter:5.8.2"
+}
+
+application {
+  mainClass = "edu.uph.learn.maharadja.Main"
+}
+
+tasks.named("test") {
+  useJUnitPlatform()
+}
