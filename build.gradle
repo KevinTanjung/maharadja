@@ -18,3 +18,13 @@ application {
 tasks.named("test") {
   useJUnitPlatform()
 }
+
+tasks.named("run") {
+  doFirst {
+    if (project.hasProperty("server")) {
+      args = ["--server", project.property("server").toString()]
+    } else if (project.hasProperty("client")) {
+      args = ["--client", project.property("client").toString()]
+    }
+  }
+}
