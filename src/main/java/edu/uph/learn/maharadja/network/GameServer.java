@@ -5,7 +5,8 @@ import edu.uph.learn.maharadja.controller.RegisterController;
 import edu.uph.learn.maharadja.controller.common.Action;
 import edu.uph.learn.maharadja.controller.common.ControllerFactory;
 import edu.uph.learn.maharadja.controller.common.Message;
-import edu.uph.learn.maharadja.network.heartbeat.HeartbeatController;
+import edu.uph.learn.maharadja.controller.HeartbeatController;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,6 +51,7 @@ public class GameServer {
 
   //region Server State
   private static boolean started;
+  @Getter
   private static boolean ready;
   private static String username;
   private static final List<ClientHandler> clients = Collections.synchronizedList(new ArrayList<>());
