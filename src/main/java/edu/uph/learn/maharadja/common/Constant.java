@@ -1,4 +1,4 @@
-package edu.uph.learn.maharadja;
+package edu.uph.learn.maharadja.common;
 
 public class Constant {
   private Constant() {}

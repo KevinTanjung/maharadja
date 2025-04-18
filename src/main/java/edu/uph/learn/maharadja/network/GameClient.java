@@ -1,6 +1,6 @@
 package edu.uph.learn.maharadja.network;
 
-import edu.uph.learn.maharadja.Constant;
+import edu.uph.learn.maharadja.common.Constant;
 import edu.uph.learn.maharadja.controller.common.Action;
 import lombok.extern.slf4j.Slf4j;
 

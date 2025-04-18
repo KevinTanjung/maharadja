@@ -1,11 +1,11 @@
 package edu.uph.learn.maharadja.network;
 
-import edu.uph.learn.maharadja.Constant;
+import edu.uph.learn.maharadja.common.Constant;
+import edu.uph.learn.maharadja.controller.HeartbeatController;
 import edu.uph.learn.maharadja.controller.RegisterController;
 import edu.uph.learn.maharadja.controller.common.Action;
 import edu.uph.learn.maharadja.controller.common.ControllerFactory;
 import edu.uph.learn.maharadja.controller.common.Message;
-import edu.uph.learn.maharadja.controller.HeartbeatController;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
