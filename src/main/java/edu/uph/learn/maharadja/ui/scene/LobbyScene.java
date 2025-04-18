@@ -2,13 +2,17 @@ package edu.uph.learn.maharadja.ui.scene;
 
 import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.common.Constant;
+import edu.uph.learn.maharadja.ui.GameWindow;
 import edu.uph.learn.maharadja.ui.factory.ButtonFactory;
 import edu.uph.learn.maharadja.ui.factory.FormFactory;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
@@ -20,9 +24,12 @@ import static edu.uph.learn.maharadja.common.Constant.DEFAULT_WIDTH;
 
 public class LobbyScene extends Scene {
   private static final double FORM_WIDTH = 420;
+  private final GameWindow gameWindow;
+  private TextField usernameField;
 
-  public LobbyScene() {
+  public LobbyScene(GameWindow gameWindow) {
     super(new BorderPane(), Constant.DEFAULT_WIDTH, Constant.DEFAULT_HEIGHT);
+    this.gameWindow = gameWindow;
     setFill(Color.IVORY_WHITE.get());
 
     BorderPane root = ((BorderPane) getRoot());
@@ -53,18 +60,40 @@ public class LobbyScene extends Scene {
     Label errorLabel = FormFactory.label("", FORM_WIDTH, FormFactory.Aligment.CENTER);
     container.getChildren().add(errorLabel);
     container.getChildren().add(FormFactory.label("USERNAME", FORM_WIDTH, FormFactory.Aligment.CENTER));
-    container.getChildren().add(FormFactory.textField(FORM_WIDTH));
+    usernameField = FormFactory.textField(FORM_WIDTH);
+    container.getChildren().add(usernameField);
     //endregion
 
     //region Buttons
     double width = (FORM_WIDTH / 2) - 8;
+
     Button serverButton = ButtonFactory.primary("HOST", width);
     HBox.setMargin(serverButton, new Insets(8, 16, 0, 0));
+    serverButton.setOnAction(new ButtonHandler(true));
+
     Button clientButton = ButtonFactory.primary("JOIN", width);
     HBox.setMargin(clientButton, new Insets(8, 0, 0, 0));
+    clientButton.setOnAction(new ButtonHandler(false));
+
     container.getChildren().add(new HBox(serverButton, clientButton));
     //endregion
 
     ((BorderPane) getRoot()).setCenter(container);
+  }
+
+  private class ButtonHandler implements EventHandler<ActionEvent> {
+    private final boolean isServer;
+
+    public ButtonHandler(boolean isServer) {
+      this.isServer = isServer;
+    }
+
+    @Override
+    public void handle(ActionEvent event) {
+      String username = usernameField.getText();
+      if (username != null && !username.isEmpty()) {
+        gameWindow.registerPlayer(username, isServer);
+      }
+    }
   }
 }

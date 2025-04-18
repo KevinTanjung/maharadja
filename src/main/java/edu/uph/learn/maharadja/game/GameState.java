@@ -11,6 +11,7 @@ import java.util.List;
 public class GameState {
   private boolean started;
   private int activeTurn;
+  private Player thisPlayer;
   private final List<Player> playerList = new LinkedList<>();
 
   //region Singleton
@@ -23,10 +24,15 @@ public class GameState {
   }
 
   private static class GameStateHolder {
-    private static final GameState INSTANCE = new GameState();
+    private static GameState INSTANCE;
   }
 
   public static GameState init() {
+    GameStateHolder.INSTANCE = new GameState();
+    return GameStateHolder.INSTANCE;
+  }
+
+  public static GameState get() {
     return GameStateHolder.INSTANCE;
   }
   //endregion
@@ -44,8 +50,21 @@ public class GameState {
     return StartResult.SUCCESS;
   }
 
+  public static Player me() {
+    return get().thisPlayer;
+  }
+
+  public static List<Player> getPlayerList() {
+    return get().playerList;
+  }
+
+  public RegisterPlayerResult registerPlayer(Player player) {
+    return registerPlayer(player, false);
+  }
+
   public RegisterPlayerResult registerPlayer(
-      final Player player
+      final Player player,
+      final boolean currentPlayer
   ) {
     if (started) {
       return RegisterPlayerResult.GAME_ALREADY_STARTED;
@@ -55,8 +74,10 @@ public class GameState {
     if (nonComputerPlayer == Constant.MAX_PLAYERS) {
       return RegisterPlayerResult.GAME_ALREADY_FULL;
     }
-
     playerList.add(nonComputerPlayer, player);
+    if (currentPlayer) {
+      thisPlayer = player;
+    }
     playerList.remove(Constant.MAX_PLAYERS);
     return RegisterPlayerResult.SUCCESS;
   }
