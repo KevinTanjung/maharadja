@@ -1,5 +1,7 @@
 package edu.uph.learn.maharadja.map;
 
+import javafx.geometry.Point2D;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,28 +9,89 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
 public class GameMap {
-  Map<Territory, Set<Territory>> adjacencyList;
+  final int q;
+  final int r;
+  final Map<Point2D, Territory> territoryMap;
+  final List<Region> regionList;
+  final List<Territory> territoryList;
+  final Map<Region, Set<Territory>> regionToTerritoryMap;
+  final Map<Territory, Set<Territory>> adjacencyList;
 
   public GameMap() {
+    this(0, 0);
+  }
+
+  public GameMap(int q, int r) {
+    this.q = q;
+    this.r = r;
+    this.territoryMap = new HashMap<>();
+    this.regionList = new ArrayList<>();
+    this.territoryList = new ArrayList<>();
+    this.regionToTerritoryMap = new HashMap<>();
     this.adjacencyList = new HashMap<>();
   }
 
-  public void addTerritory(Territory territory) {
+  //region should only be used by GameMapLoader
+  void addRegion(Region region) {
+    if (regionToTerritoryMap.containsKey(region)) {
+      return;
+    }
+
+    regionList.add(region);
+    regionToTerritoryMap.putIfAbsent(region, new HashSet<>());
+  }
+
+  void addTerritory(Territory territory) {
+    if (adjacencyList.containsKey(territory)) {
+      return;
+    }
+
+    territoryMap.put(new Point2D(territory.getQ(), territory.getR()), territory);
+    territoryList.add(territory);
+    regionToTerritoryMap.putIfAbsent(territory.getRegion(), new HashSet<>());
+    regionToTerritoryMap.get(territory.getRegion()).add(territory);
     adjacencyList.putIfAbsent(territory, new HashSet<>());
   }
 
-  public void addConnection(Territory origin, Territory destination) {
+  void addConnection(Territory origin, Territory destination) {
+    addTerritory(origin);
+    addTerritory(destination);
     adjacencyList.get(origin).add(destination);
     adjacencyList.get(destination).add(origin);
   }
+  //endregion
 
+  public int getQ() {
+    return q;
+  }
+
+  public int getR() {
+    return r;
+  }
+
+  public Map<Point2D, Territory> getTerritoryMap() {
+    return territoryMap;
+  }
+
+  public List<Region> getAllRegions() {
+    return regionList;
+  }
+
+  public List<Territory> getAllTerritories() {
+    return territoryList;
+  }
+
+  public List<Territory> getTerritoriesByRegion(Region region) {
+    return regionToTerritoryMap.getOrDefault(region, Set.of()).stream().toList();
+  }
 
   public boolean isAttackable(Territory origin, Territory destination) {
-    return origin.getOwner() != destination.getOwner()
+    return !Objects.equals(origin.getOwner(), destination.getOwner())
         && adjacencyList.get(origin).contains(destination);
   }
 
@@ -48,7 +111,7 @@ public class GameMap {
     }
     // Ensure that the origin and destination are owned by the same person.
     // If it isn't then, there's no path to the destination.
-    if (origin.getOwner() != destination.getOwner()) {
+    if (!Objects.equals(origin.getOwner(), destination.getOwner())) {
       return List.of();
     }
 
@@ -68,7 +131,7 @@ public class GameMap {
 
       for (Territory next : adjacencyList.get(current)) {
         if (visited.contains(next)) continue;
-        if (next.getOwner() != current.getOwner()) continue;
+        if (!Objects.equals(next.getOwner(), current.getOwner())) continue;
         visited.add(next);
         queue.add(next);
         parentMap.put(next, current);
