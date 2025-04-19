@@ -1,6 +1,7 @@
 package edu.uph.learn.maharadja.game;
 
 import edu.uph.learn.maharadja.common.Constant;
+import edu.uph.learn.maharadja.map.GameMap;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +14,7 @@ public class GameState {
   private int activeTurn;
   private Player thisPlayer;
   private final List<Player> playerList = new LinkedList<>();
+  private GameMap gameMap;
 
   //region Singleton
   // VisibleForTesting
@@ -56,6 +58,10 @@ public class GameState {
 
   public static List<Player> getPlayerList() {
     return get().playerList;
+  }
+
+  public static void setGameMap(GameMap gameMap) {
+    GameStateHolder.INSTANCE.gameMap = gameMap;
   }
 
   public RegisterPlayerResult registerPlayer(Player player) {
