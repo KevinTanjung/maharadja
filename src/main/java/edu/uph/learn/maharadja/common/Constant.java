@@ -7,6 +7,7 @@ public class Constant {
 
   public static final int MAX_PLAYERS = 4;
   public static final String LOBBY_FULL = "LOBBY_FULL";
+  public static final int INITIAL_TROOP_PER_PLAYER = 40;
 
   //region UI Constants
   public static final Font SMALL_FONT = new Font("Verdana Bold", 12);

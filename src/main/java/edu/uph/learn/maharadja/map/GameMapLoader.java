@@ -1,6 +1,7 @@
 package edu.uph.learn.maharadja.map;
 
 import edu.uph.learn.maharadja.common.Color;
+import edu.uph.learn.maharadja.game.GameState;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
@@ -49,10 +50,14 @@ public class GameMapLoader {
           Territory origin = territoryByName.get(territoryFile.name);
           for (String neighbor : territoryFile.adjacentTo) {
             Territory destination = territoryByName.get(neighbor);
+            if (origin == null || destination == null) {
+              System.out.println(OBJECT_MAPPER.writeValueAsString(territoryFile));
+            }
             gameMap.addConnection(origin, destination);
           }
         }
       }
+      GameState.setGameMap(gameMap);
       return gameMap;
     } catch (Exception e) {
       LOG.error("Failed to load map", e);

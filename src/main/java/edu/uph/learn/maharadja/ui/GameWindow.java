@@ -16,6 +16,9 @@ public class GameWindow {
     stage.getIcons().add(new Image("assets/icon.png"));
     stage.setResizable(false);
     openLobby();
+
+    // Debugging
+    registerPlayer("GajahMada", true);
   }
 
   public void openLobby() {

@@ -1,5 +1,6 @@
 package edu.uph.learn.maharadja.map;
 
+import edu.uph.learn.maharadja.game.Player;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -65,11 +66,13 @@ class TestGameMap {
   public void isAttackable_CheckDifferentOwner_AndAdjacent() {
     // Given
     Region nusantara = new Region("Nusantara");
-    Territory singhasari = givenTerritory(nusantara, "Singhasari", 1);
-    Territory trowulan = givenTerritory(nusantara, "Trowulan", 2);
-    Territory sundaKingdom = givenTerritory(nusantara, "Sunda Kingdom", 1);
+    Player firstPlayer = Player.computer(1);
+    Player secondPlayer = Player.computer(2);
+    Territory singhasari = givenTerritory(nusantara, "Singhasari", firstPlayer);
+    Territory trowulan = givenTerritory(nusantara, "Trowulan", secondPlayer);
+    Territory sundaKingdom = givenTerritory(nusantara, "Sunda Kingdom", firstPlayer);
     Region sumatra = new Region("Sumatra");
-    Territory lampung = givenTerritory(sumatra, "Lampung", 2);
+    Territory lampung = givenTerritory(sumatra, "Lampung", secondPlayer);
 
     GameMap map = new GameMap();
     map.addTerritory(singhasari);
@@ -100,17 +103,19 @@ class TestGameMap {
   public void getShortestDeploymentPath_CheckSameOwner_AndHasConnection() {
     // Given
     Region nusantara = new Region("Nusantara");
-    Territory singhasari = givenTerritory(nusantara, "Singhasari", 1);
-    Territory trowulan = givenTerritory(nusantara, "Trowulan", 2);
-    Territory surabaya = givenTerritory(nusantara, "Surabaya", 2);
-    Territory bali = givenTerritory(nusantara, "Bali", 2);
-    Territory sundaKingdom = givenTerritory(nusantara, "Sunda Kingdom", 1);
+    Player firstPlayer = Player.computer(1);
+    Player secondPlayer = Player.computer(2);
+    Territory singhasari = givenTerritory(nusantara, "Singhasari", firstPlayer);
+    Territory trowulan = givenTerritory(nusantara, "Trowulan", secondPlayer);
+    Territory surabaya = givenTerritory(nusantara, "Surabaya", secondPlayer);
+    Territory bali = givenTerritory(nusantara, "Bali", secondPlayer);
+    Territory sundaKingdom = givenTerritory(nusantara, "Sunda Kingdom", firstPlayer);
     Region sumatra = new Region("Sumatra");
-    Territory lampung = givenTerritory(sumatra, "Lampung", 1);
-    Territory palembang = givenTerritory(sumatra, "Palembang", 1);
-    Territory jambi = givenTerritory(sumatra, "Jambi", 1);
-    Territory barus = givenTerritory(sumatra, "Barus", 1);
-    Territory aceh = givenTerritory(sumatra, "Aceh", 2);
+    Territory lampung = givenTerritory(sumatra, "Lampung", firstPlayer);
+    Territory palembang = givenTerritory(sumatra, "Palembang", firstPlayer);
+    Territory jambi = givenTerritory(sumatra, "Jambi", firstPlayer);
+    Territory barus = givenTerritory(sumatra, "Barus", firstPlayer);
+    Territory aceh = givenTerritory(sumatra, "Aceh", secondPlayer);
 
     GameMap map = new GameMap();
     map.addTerritory(singhasari);
@@ -164,7 +169,7 @@ class TestGameMap {
   private static Territory givenTerritory(
       Region region,
       String name,
-      int owner
+      Player owner
   ) {
     Territory territory = new Territory(region, name);
     territory.setOwner(owner);

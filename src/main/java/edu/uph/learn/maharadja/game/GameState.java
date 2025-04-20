@@ -60,6 +60,10 @@ public class GameState {
     return get().playerList;
   }
 
+  public static GameMap getGameMap() {
+    return get().gameMap;
+  }
+
   public static void setGameMap(GameMap gameMap) {
     GameStateHolder.INSTANCE.gameMap = gameMap;
   }
@@ -80,6 +84,7 @@ public class GameState {
     if (nonComputerPlayer == Constant.MAX_PLAYERS) {
       return RegisterPlayerResult.GAME_ALREADY_FULL;
     }
+    player.setColor(Player.PLAYER_COLORS.get(3 - nonComputerPlayer));
     playerList.add(nonComputerPlayer, player);
     if (currentPlayer) {
       thisPlayer = player;

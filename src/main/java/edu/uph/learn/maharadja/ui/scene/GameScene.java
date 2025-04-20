@@ -2,7 +2,7 @@ package edu.uph.learn.maharadja.ui.scene;
 
 import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.common.Constant;
-import edu.uph.learn.maharadja.game.GameState;
+import edu.uph.learn.maharadja.game.GameEngine;
 import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.GameMapLoader;
 import edu.uph.learn.maharadja.map.MapType;
@@ -10,13 +10,13 @@ import edu.uph.learn.maharadja.ui.GameWindow;
 import edu.uph.learn.maharadja.ui.components.MapPane;
 import edu.uph.learn.maharadja.ui.components.SidePane;
 import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 
+@SuppressWarnings( {"FieldCanBeLocal", "unused"})
 public class GameScene extends Scene {
   private final GameWindow gameWindow;
+  private final GameEngine gameEngine;
 
   public GameScene(GameWindow gameWindow) {
     super(new HBox(), Constant.DEFAULT_WIDTH, Constant.DEFAULT_HEIGHT);
@@ -24,12 +24,12 @@ public class GameScene extends Scene {
     setFill(Color.IVORY_WHITE.get());
 
     GameMap gameMap = GameMapLoader.load(MapType.CLASSIC);
-    GameState.setGameMap(gameMap);
+    this.gameEngine = new GameEngine(gameMap);
 
     HBox root = (HBox) getRoot();
-    ScrollPane left = new MapPane(gameMap);
-    HBox.setHgrow(left, Priority.ALWAYS);
-    VBox right = new SidePane();
-    root.getChildren().addAll(left, right);
+    MapPane mapPane = new MapPane(gameMap);
+    HBox.setHgrow(mapPane, Priority.ALWAYS);
+    SidePane sidePane = new SidePane();
+    root.getChildren().addAll(mapPane, sidePane);
   }
 }

@@ -4,6 +4,7 @@ import edu.uph.learn.maharadja.game.GameState;
 import edu.uph.learn.maharadja.network.GameClient;
 import edu.uph.learn.maharadja.network.GameServer;
 import edu.uph.learn.maharadja.ui.GameWindow;
+import edu.uph.learn.maharadja.event.EventBus;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ public class Main extends Application {
   private static GameClient client;
   private static GameState state;
   private static GameWindow window;
+  private static EventBus eventBus;
 
   public static void main(String[] args) {
     if (args.length == 2 && args[0].equals("--server")) {
@@ -34,6 +36,7 @@ public class Main extends Application {
   @Override
   public void start(Stage primaryStage) {
     state = GameState.init();
+    eventBus = EventBus.init();
     window = new GameWindow(primaryStage);
   }
 }

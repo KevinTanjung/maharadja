@@ -1,19 +1,18 @@
 package edu.uph.learn.maharadja.map;
 
 import edu.uph.learn.maharadja.common.Color;
+import edu.uph.learn.maharadja.game.Player;
 
 import java.util.Objects;
 
-public class Region {
+public class Region implements Comparable<Region> {
   private final String name;
   private final int bonusTroops;
-  private Integer owner;
-  private Color color;
+  private final Color color;
+  private Player owner;
 
   public Region(String name) {
-    this.name = name;
-    this.bonusTroops = 0;
-    this.color = Color.IMPERIAL_GOLD;
+    this(name, 0, Color.IMPERIAL_GOLD);
   }
 
   public Region(String name, int bonusTroops, Color color) {
@@ -34,11 +33,11 @@ public class Region {
     return color;
   }
 
-  public Integer getOwner() {
+  public Player getOwner() {
     return owner;
   }
 
-  public void setOwner(Integer owner) {
+  public void setOwner(Player owner) {
     this.owner = owner;
   }
 
@@ -57,5 +56,10 @@ public class Region {
   @Override
   public int hashCode() {
     return Objects.hashCode(name);
+  }
+
+  @Override
+  public int compareTo(Region o) {
+    return getName().compareTo(o.getName());
   }
 }

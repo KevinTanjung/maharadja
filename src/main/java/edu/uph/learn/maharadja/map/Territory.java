@@ -1,11 +1,13 @@
 package edu.uph.learn.maharadja.map;
 
+import edu.uph.learn.maharadja.game.Player;
+
 import java.util.Objects;
 
 public class Territory {
   private final Region region;
   private final String name;
-  private Integer owner;
+  private Player owner;
   private int numberOfStationedTroops;
   private final int q;
   private final int r;
@@ -21,6 +23,7 @@ public class Territory {
   public Territory(Region region, String name, int q, int r) {
     this.region = region;
     this.name = name;
+    this.numberOfStationedTroops = 1;
     this.q = q;
     this.r = r;
   }
@@ -33,11 +36,11 @@ public class Territory {
     return name;
   }
 
-  public Integer getOwner() {
+  public Player getOwner() {
     return owner;
   }
 
-  public void setOwner(int owner) {
+  public void setOwner(Player owner) {
     this.owner = owner;
   }
 

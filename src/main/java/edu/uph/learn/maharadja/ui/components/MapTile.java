@@ -1,13 +1,14 @@
 package edu.uph.learn.maharadja.ui.components;
 
 import edu.uph.learn.maharadja.common.Color;
+import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.map.Region;
 import edu.uph.learn.maharadja.map.Territory;
+import edu.uph.learn.maharadja.ui.TileType;
+import edu.uph.learn.maharadja.ui.event.MapTileSelectedEvent;
+import javafx.scene.Cursor;
 import javafx.scene.control.Tooltip;
 import javafx.scene.shape.Polygon;
-
-import java.util.List;
-import java.util.Random;
 
 import static edu.uph.learn.maharadja.common.UI.HEX_SIZE;
 
@@ -15,56 +16,113 @@ import static edu.uph.learn.maharadja.common.UI.HEX_SIZE;
  * Inspired by <a href="https://www.redblobgames.com/grids/hexagons-v1">source</a>
  */
 public class MapTile extends Polygon {
-  private static final Random RANDOM = new Random();
-  private static final List<javafx.scene.paint.Color> WATER_COLORS = List.of(
-      Color.ALICE_BLUE.get(),
-      javafx.scene.paint.Color.web(Color.SKY_BLUE.toHex(), 0.3),
-      javafx.scene.paint.Color.web(Color.LIGHT_BLUE.toHex(), 0.1)
-  );
-
   private final Territory territory;
   private final Region region;
+  private final TileType tileType;
+  //private final Text label;
 
   public MapTile(int q, int r) {
-    this(null, null, q, r);
+    this(null, null, q, r, TileType.WATER);
   }
 
   public MapTile(Territory territory) {
-    this(territory, territory.getRegion(), territory.getQ(), territory.getR());
+    this(territory, territory.getRegion(), territory.getQ(), territory.getR(), TileType.TERRITORY);
   }
 
-  private MapTile(Territory territory, Region region, int q, int r) {
+  private MapTile(Territory territory, Region region, int q, int r, TileType tileType) {
     super();
     this.territory = territory;
     this.region = region;
+    this.tileType = tileType;
 
+    // https://www.redblobgames.com/grids/hexagons-v1/#angles
     for (int i = 0; i < 6; i++) {
       double angle = Math.toRadians(60 * i + 30);
       getPoints().addAll(HEX_SIZE * Math.cos(angle), HEX_SIZE * Math.sin(angle));
     }
-
-    Tooltip tooltip = new Tooltip();
-    if (region == null) {
-      var color = getWaterColor();
-      setStroke(Color.SKY_BLUE.get());
-      setFill(color);
-      tooltip.setText("Water " + color.toString());
-    } else {
-      setStroke(region.getColor() != null ? region.getColor().get() : Color.VOLCANIC_BLACK.get());
-      setFill(Color.IVORY_WHITE.get());
-      setOnMouseEntered(e -> setStrokeWidth(2));
-      setOnMouseExited(e -> setStrokeWidth(1));
-      tooltip.setText("Territory: " + territory.getName() + "\n" + "Region: " + region.getName());
-    }
-    Tooltip.install(this, tooltip);
-
+    // https://www.redblobgames.com/grids/hexagons-v1/#hex-to-pixel-offset
     double x = HEX_SIZE * Math.sqrt(3) * (q + 0.5 * (r & 1));
     double y = HEX_SIZE * 3 / 2 * r;
     setTranslateX(x);
     setTranslateY(y);
+
+    if (region == null) {
+      setStroke(javafx.scene.paint.Color.web(Color.SKY_BLUE.toHex(), 0.3));
+      setFill(Color.ALICE_BLUE.get());
+      //label = null;
+    } else {
+      setStrokeBasedOnRegion();
+      setFillBasedOnTerritoryOwner();
+      setMouseEvent();
+      //label = renderLabel();
+      Tooltip tooltip = new Tooltip();
+      tooltip.setText("Territory: " + territory.getName() + "\n" + "Region: " + region.getName());
+      Tooltip.install(this, tooltip);
+    }
   }
 
-  private javafx.scene.paint.Color getWaterColor() {
-    return WATER_COLORS.get(RANDOM.nextInt(3));
+  public TileType getTileType() {
+    return tileType;
+  }
+
+  public Territory getTerritory() {
+    return territory;
+  }
+
+  public Region getRegion() {
+    return region;
+  }
+
+  //public Text getLabel() {
+  //  return label;
+  //}
+
+  //private Text renderLabel() {
+  //  Point2D point2D = computeCentroid();
+  //  Text label = new Text(territory.getName() + "\n" + region.getName());
+  //  label.setX(point2D.getX());
+  //  label.setY(point2D.getY());
+  //  label.setMouseTransparent(true);
+  //  return label;
+  //}
+  //
+  //private Point2D computeCentroid() {
+  //  double x = 0, y = 0;
+  //  ObservableList<Double> coords = getPoints();
+  //  for (int i = 0; i < coords.size(); i += 2) {
+  //    x += coords.get(i);
+  //    y += coords.get(i + 1);
+  //  }
+  //  return new Point2D(x / coords.size() / 2, y / coords.size() / 2);
+  //}
+
+  private void setStrokeBasedOnRegion() {
+    if (region.getColor() == null) {
+      setStroke(Color.VOLCANIC_BLACK.get());
+    } else {
+      setStroke(region.getColor().get());
+    }
+  }
+
+  private void setFillBasedOnTerritoryOwner() {
+    if (territory.getOwner() == null) {
+      setFill(Color.IVORY_WHITE.get());
+    } else {
+      Color playerColor = territory.getOwner().getColor();
+      javafx.scene.paint.Color color = javafx.scene.paint.Color.web(playerColor.toHex(), 0.5);
+      setFill(color);
+    }
+  }
+
+  private void setMouseEvent() {
+    setOnMouseEntered(e -> {
+      setStrokeWidth(2);
+      setCursor(Cursor.HAND);
+    });
+    setOnMouseExited(e -> {
+      setStrokeWidth(1);
+      setCursor(Cursor.DEFAULT);
+    });
+    setOnMouseClicked(e -> EventBus.emit(new MapTileSelectedEvent(this)));
   }
 }
