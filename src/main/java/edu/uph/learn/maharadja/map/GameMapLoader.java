@@ -15,6 +15,9 @@ import java.util.Map;
 
 import static edu.uph.learn.maharadja.common.ObjectMapperUtil.OBJECT_MAPPER;
 
+/**
+ * Helper to load the map from a JSON file into our desired data structure stored in {@link GameMap}.
+ */
 public class GameMapLoader {
   private static final Logger LOG = LoggerFactory.getLogger(GameMapLoader.class);
   private static final ClassLoader CLASS_LOADER = GameMapLoader.class.getClassLoader();

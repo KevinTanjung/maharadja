@@ -77,6 +77,18 @@ public class Territory {
   }
 
   @Override
+  public String toString() {
+    return "Territory{" +
+        "region=" + region.getName() +
+        ", name='" + name + '\'' +
+        ", owner=" + (owner == null ? "null" : owner.getUsername()) +
+        ", numberOfStationedTroops=" + numberOfStationedTroops +
+        ", q=" + q +
+        ", r=" + r +
+        '}';
+  }
+
+  @Override
   public int hashCode() {
     int result = Objects.hashCode(region);
     result = 31 * result + Objects.hashCode(name);

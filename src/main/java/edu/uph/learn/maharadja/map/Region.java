@@ -3,6 +3,7 @@ package edu.uph.learn.maharadja.map;
 import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.game.Player;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -41,6 +42,10 @@ public class Region implements Comparable<Region> {
 
   public Color getColor() {
     return color;
+  }
+
+  public Set<Territory> getTerritories() {
+    return Collections.unmodifiableSet(territories);
   }
 
   public Player getOwner() {

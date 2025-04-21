@@ -10,16 +10,35 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 
 public class GameMap {
+  /**
+   * Lamuri                Water               Water
+   *  (0,5)                (1,5)               (2,5)
+   *        \          /            \           /
+   *          [Barus]   --------  Toba Highlands
+   *           (1,6)                  (2,6)
+   *           /        \           /           \
+   *     Water  ----- [Minangkabau]    ---------   Indrapura
+   *      (0,7)           (1,7)                     (2,7)
+   *         \         /           \             /           \
+   *           Water    ----------   Bengkulu      ---------   Jambi
+   *           (1,8)                  (2,8)                    (3,8)
+   */
+  private static final int[][][] AXIAL_NEIGHBORS = new int[][][] {
+      //             East,   North West,  North East,   West,      South West,  South East
+      new int[][] { {1, 0},   {-1, -1},    {0, -1},    {-1, 0},     {-1, 1},     {0, 1} },      // Even Row
+      new int[][] { {1, 0},   {0, -1},     {1, -1},    {-1, 0},      {0, 1},     {1, 1} },      // Odd Row
+  };
+
   final int q;
   final int r;
   final Map<Point2D, Territory> territoryMap;
   final List<Region> regionList;
   final List<Territory> territoryList;
-  final Map<Region, Set<Territory>> regionToTerritoryMap;
   final Map<Territory, Set<Territory>> adjacencyList;
 
   public GameMap() {
@@ -32,18 +51,15 @@ public class GameMap {
     this.territoryMap = new HashMap<>();
     this.regionList = new ArrayList<>();
     this.territoryList = new ArrayList<>();
-    this.regionToTerritoryMap = new HashMap<>();
     this.adjacencyList = new HashMap<>();
   }
 
   //region should only be used by GameMapLoader
   void addRegion(Region region) {
-    if (regionToTerritoryMap.containsKey(region)) {
+    if (regionList.contains(region)) {
       return;
     }
-
     regionList.add(region);
-    regionToTerritoryMap.putIfAbsent(region, new HashSet<>());
   }
 
   void addTerritory(Territory territory) {
@@ -53,9 +69,16 @@ public class GameMap {
 
     territoryMap.put(new Point2D(territory.getQ(), territory.getR()), territory);
     territoryList.add(territory);
-    regionToTerritoryMap.putIfAbsent(territory.getRegion(), new HashSet<>());
-    regionToTerritoryMap.get(territory.getRegion()).add(territory);
     adjacencyList.putIfAbsent(territory, new HashSet<>());
+
+    // compute adjacency, since we store it bidirectional, if a new one attached to a previously added old one,
+    // then the old one "neighbor" will be discovered automatically
+    for (int[] direction : AXIAL_NEIGHBORS[territory.getR() % 2]) {
+      Point2D coordinate = new Point2D(territory.getQ() + direction[0], territory.getR() + direction[1]);
+      Optional.ofNullable(territoryMap.get(coordinate))
+          .filter(neighbor -> !neighbor.equals(territory))
+          .ifPresent(neighbor -> addConnection(territory, neighbor));
+    }
   }
 
   void addConnection(Territory origin, Territory destination) {
@@ -87,7 +110,7 @@ public class GameMap {
   }
 
   public List<Territory> getTerritoriesByRegion(Region region) {
-    return regionToTerritoryMap.getOrDefault(region, Set.of()).stream().toList();
+    return List.copyOf(region.getTerritories());
   }
 
   public boolean isAttackable(Territory origin, Territory destination) {

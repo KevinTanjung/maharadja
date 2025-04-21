@@ -9,6 +9,9 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Main class that manage the transition between JavaFX scene.
+ */
 public class GameWindow {
   private static final Logger LOG = LoggerFactory.getLogger(GameWindow.class);
 

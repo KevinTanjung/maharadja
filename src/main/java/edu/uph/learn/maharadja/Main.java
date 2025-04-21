@@ -33,6 +33,10 @@ public class Main extends Application {
     }
   }
 
+  /**
+   * Initialize necessary singletons such as {@link GameState} or {@link EventBus}.
+   * Then, load the {@link GameWindow}.
+   */
   @Override
   public void start(Stage primaryStage) {
     state = GameState.init();
