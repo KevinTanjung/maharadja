@@ -5,7 +5,7 @@ public class UI {
 
   public static final double WIDTH = 960;
   public static final double HEIGHT = 540;
-  public static final double TAB_WIDTH = WIDTH / 3;
+  public static final double TAB_WIDTH = WIDTH / 4;
   public static final double PANE_HEIGHT = HEIGHT / 3;
 
   public static final double MIN_SCALE = 1;

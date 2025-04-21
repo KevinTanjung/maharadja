@@ -25,7 +25,7 @@ public class GameWindow {
     openLobby();
 
     // Debugging
-    //registerPlayer("GajahMada", true);
+    registerPlayer("GajahMada", true);
   }
 
   public void openLobby() {

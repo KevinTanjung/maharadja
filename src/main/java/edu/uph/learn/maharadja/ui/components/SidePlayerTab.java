@@ -16,6 +16,7 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TitledPane;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.VBox;
 
 import java.util.Collections;
@@ -73,13 +74,18 @@ public class SidePlayerTab extends Tab {
   public static class FXRegion extends TitledPane implements Comparable<FXRegion> {
     private final ObservableList<FXTerritory> territoryList = FXCollections.observableArrayList();
     private final Region region;
-    private int totalTroopsInRegion;
+    private final SimpleIntegerProperty totalTroopsInRegion = new SimpleIntegerProperty(0);
 
     public FXRegion(Region region) {
       this.region = region;
-      setText(region.getName());
+      this.totalTroopsInRegion.addListener((obs, oldVal, newVal) -> updateTitle());
+      updateTitle();
       setBorder(BorderFactory.color(region.getColor()));
-      totalTroopsInRegion = 0;
+      setBackground(Background.fill(Color.IVORY_WHITE.get()));
+    }
+
+    private void updateTitle() {
+      setText(String.format("%s (%s)", region.getName(), totalTroopsInRegion.get()));
     }
 
     public void addTerritory(FXTerritory territory) {
@@ -87,12 +93,12 @@ public class SidePlayerTab extends Tab {
         return;
       }
       territoryList.add(territory);
-      totalTroopsInRegion += territory.getNumberOfStationedTroops();
+      totalTroopsInRegion.set(totalTroopsInRegion.get() + territory.getNumberOfStationedTroops());;
     }
 
     @Override
     public int compareTo(FXRegion o) {
-      return Integer.compare(totalTroopsInRegion, o.totalTroopsInRegion) * -1;
+      return Integer.compare(totalTroopsInRegion.get(), o.totalTroopsInRegion.get()) * -1;
     }
 
     @Override
