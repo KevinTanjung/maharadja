@@ -13,14 +13,11 @@ public class Territory {
   private final int r;
 
   public Territory(Region region, String name) {
-    this.region = region;
-    this.name = name;
-    this.numberOfStationedTroops = 1;
-    this.q = 0;
-    this.r = 0;
+    this(region, name, 0, 0);
   }
 
   public Territory(Region region, String name, int q, int r) {
+    region.addRegion(this);
     this.region = region;
     this.name = name;
     this.numberOfStationedTroops = 1;

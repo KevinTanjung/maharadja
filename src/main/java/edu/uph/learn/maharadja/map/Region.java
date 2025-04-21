@@ -3,12 +3,15 @@ package edu.uph.learn.maharadja.map;
 import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.game.Player;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class Region implements Comparable<Region> {
   private final String name;
   private final int bonusTroops;
   private final Color color;
+  private final Set<Territory> territories = new HashSet<>();
   private Player owner;
 
   public Region(String name) {
@@ -19,6 +22,13 @@ public class Region implements Comparable<Region> {
     this.name = name;
     this.bonusTroops = bonusTroops;
     this.color = color;
+  }
+
+  /**
+   * Set to package-private, since only {@link Territory} should access this.
+   */
+  void addRegion(Territory territory) {
+    territories.add(territory);
   }
 
   public String getName() {

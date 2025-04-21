@@ -6,8 +6,12 @@ import edu.uph.learn.maharadja.ui.scene.GameScene;
 import edu.uph.learn.maharadja.ui.scene.LobbyScene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GameWindow {
+  private static final Logger LOG = LoggerFactory.getLogger(GameWindow.class);
+
   private final Stage stage;
 
   public GameWindow(Stage stage) {
@@ -18,10 +22,11 @@ public class GameWindow {
     openLobby();
 
     // Debugging
-    registerPlayer("GajahMada", true);
+    //registerPlayer("GajahMada", true);
   }
 
   public void openLobby() {
+    LOG.info("Opening Lobby...");
     stage.setScene(new LobbyScene(this));
     stage.show();
   }
@@ -30,11 +35,13 @@ public class GameWindow {
       final String username,
       boolean isServer
   ) {
+    LOG.info("Registering [{}] as [{}]...", username, isServer ? "HOST" : "GUEST");
     Player player = Player.user(username);
     GameState.get().registerPlayer(player, true);
     GameState.get().start();
 
     // TODO: transition to server/client scene
+    LOG.info("Loading the game up...");
     stage.setScene(new GameScene(this));
     stage.show();
   }
