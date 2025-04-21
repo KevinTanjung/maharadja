@@ -9,6 +9,7 @@ import edu.uph.learn.maharadja.ui.event.MapTileSelectedEvent;
 import javafx.scene.Cursor;
 import javafx.scene.control.Tooltip;
 import javafx.scene.shape.Polygon;
+import javafx.util.Duration;
 
 import static edu.uph.learn.maharadja.common.UI.HEX_SIZE;
 
@@ -55,8 +56,13 @@ public class MapTile extends Polygon {
       setFillBasedOnTerritoryOwner();
       setMouseEvent();
       //label = renderLabel();
-      Tooltip tooltip = new Tooltip();
-      tooltip.setText("Territory: " + territory.getName() + "\n" + "Region: " + region.getName());
+      Tooltip tooltip = new Tooltip(String.format("Territory: %s\nRegion: %s\n%s",
+          territory.getName(),
+          region.getName(),
+          territory.getOwner() == null ? "" : String.format("Ruler: %s", territory.getOwner().getUsername())
+      ));
+      tooltip.setShowDelay(Duration.millis(50));
+      tooltip.setHideDelay(Duration.millis(100));
       Tooltip.install(this, tooltip);
     }
   }
@@ -72,29 +78,6 @@ public class MapTile extends Polygon {
   public Region getRegion() {
     return region;
   }
-
-  //public Text getLabel() {
-  //  return label;
-  //}
-
-  //private Text renderLabel() {
-  //  Point2D point2D = computeCentroid();
-  //  Text label = new Text(territory.getName() + "\n" + region.getName());
-  //  label.setX(point2D.getX());
-  //  label.setY(point2D.getY());
-  //  label.setMouseTransparent(true);
-  //  return label;
-  //}
-  //
-  //private Point2D computeCentroid() {
-  //  double x = 0, y = 0;
-  //  ObservableList<Double> coords = getPoints();
-  //  for (int i = 0; i < coords.size(); i += 2) {
-  //    x += coords.get(i);
-  //    y += coords.get(i + 1);
-  //  }
-  //  return new Point2D(x / coords.size() / 2, y / coords.size() / 2);
-  //}
 
   private void setStrokeBasedOnRegion() {
     if (region.getColor() == null) {
