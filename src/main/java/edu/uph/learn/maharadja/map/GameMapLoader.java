@@ -60,7 +60,6 @@ public class GameMapLoader {
           }
         }
       }
-      GameState.setGameMap(gameMap);
       return gameMap;
     } catch (Exception e) {
       LOG.error("Failed to load map", e);

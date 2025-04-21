@@ -25,19 +25,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class SidePlayerTab extends Tab {
+public class PlayerTab extends Tab {
   private final Player player;
   private final Accordion accordion;
   private final Map<Region, FXRegion> regionPanes = new HashMap<>();
   private final Map<Territory, FXTerritory> territoryLabels = new HashMap<>();
 
-  public SidePlayerTab(Player player) {
+  public PlayerTab(Player player) {
     super(player.getUsername(), new VBox());
-    setClosable(true);
+    setClosable(false);
     setStyle(String.format(
-        "-fx-background-color: %s; -fx-text-fill: %s; -fx-fill: %s;",
-        player.getColor().toHex(), Color.IVORY_WHITE.toHex(), Color.IVORY_WHITE.toHex()
+        "-fx-background-color: %s; -fx-color: %s;",
+        player.getColor().toHex(), Color.IVORY_WHITE.toHex()
     ));
+
     this.player = player;
     this.accordion = new Accordion();
     EventBus.registerListener(TroopMovementEvent.class, this::onTroopMovementEvent);

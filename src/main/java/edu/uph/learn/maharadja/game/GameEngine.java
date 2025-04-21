@@ -3,7 +3,6 @@ package edu.uph.learn.maharadja.game;
 import edu.uph.learn.maharadja.common.Constant;
 import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.Territory;
-import edu.uph.learn.maharadja.ui.components.MapTile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,12 +17,18 @@ public class GameEngine {
   private static final Random RANDOM = new SecureRandom();
   private static final Logger log = LoggerFactory.getLogger(GameEngine.class);
   private final GameMap gameMap;
-
-  private TurnPhase currentPhase;
+  private final GameState gameState;
 
   public GameEngine(GameMap gameMap) {
+    this(gameMap, GameState.get());
+  }
+
+  public GameEngine(GameMap gameMap, GameState gameState) {
     this.gameMap = gameMap;
+    this.gameState = gameState;
+    getGameState().setGameMap(gameMap);
     assignTiles();
+    getGameState().setActiveTurnPhase(TurnPhase.REINFORCEMENT);
   }
 
   private void assignTiles() {
@@ -31,6 +36,10 @@ public class GameEngine {
     List<Territory> territories = gameMap.getAllTerritories();
     int territoryCount = territories.size();
     int playerCount = 0;
+
+    if (territoryCount == 0) {
+      return;
+    }
 
     //region 1. Assign Territory randomly and place a single troop
     while (visitedTerritories.size() != territoryCount) {
@@ -51,7 +60,7 @@ public class GameEngine {
     //endregion
 
     //region 2. Assign remaining Troop randomly per playe
-    for (Player player : GameState.getPlayerList()) {
+    for (Player player : getGameState().getPlayerList()) {
       List<Territory> occupiedTerritories = new ArrayList<>(player.getTerritories());
       // since initially set to 1, number of territory equals the number of troops
       int troopCount = occupiedTerritories.size();
@@ -69,19 +78,28 @@ public class GameEngine {
     //endregion
   }
 
+  private void nextTurn() {
+    int activeTurn = getGameState().getPlayerList().indexOf(getGameState().currentTurn());
+    if (activeTurn == Constant.MAX_PLAYERS - 1) {
+      getGameState().setActiveTurn(0);
+    } else {
+      getGameState().setActiveTurn(activeTurn + 1);
+    }
+  }
+
   public void nextPhase() {
-    switch (currentPhase) {
-      case REINFORCEMENT -> currentPhase = TurnPhase.ATTACK;
-      case ATTACK -> currentPhase = TurnPhase.FORTIFY;
+    switch (getGameState().getActiveTurnPhase()) {
+      case REINFORCEMENT -> gameState.setActiveTurnPhase(TurnPhase.ATTACK);
+      case ATTACK -> gameState.setActiveTurnPhase(TurnPhase.FORTIFY);
       case FORTIFY -> {
-        currentPhase = TurnPhase.REINFORCEMENT;
-        GameState.get().nextTurn();
+        gameState.setActiveTurnPhase(TurnPhase.REINFORCEMENT);
+        nextTurn();
       }
     }
   }
 
-  public void occupyTerritory(Territory territory, int owner, int movedTroop) {
-    occupyTerritory(territory, GameState.getPlayerList().get(owner), movedTroop);
+  public void occupyTerritory(Territory territory, int playerIdx, int movedTroop) {
+    occupyTerritory(territory, getGameState().getPlayerList().get(playerIdx), movedTroop);
   }
 
   public void occupyTerritory(Territory territory, Player player, int movedTroop) {
@@ -93,5 +111,9 @@ public class GameEngine {
         "[Player {}] occupied the territory [{}/{}] and deployed [{} troop], now has [{} troop].",
         player.getUsername(), territory.getName(), territory.getRegion().getName(), movedTroop, territory.getNumberOfStationedTroops()
     );
+  }
+
+  private GameState getGameState() {
+    return gameState;
   }
 }

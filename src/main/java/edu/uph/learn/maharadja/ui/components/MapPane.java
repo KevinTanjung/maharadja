@@ -5,7 +5,9 @@ import edu.uph.learn.maharadja.map.Territory;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +20,7 @@ public class MapPane extends ScrollPane {
   public MapPane(GameMap gameMap) {
     super(new Pane(new Group()));
     this.gameMap = gameMap;
+    HBox.setHgrow(this, Priority.ALWAYS);
     setPannable(true);
     Pane content = (Pane) getContent();
     Group hexGroup = (Group) content.getChildren().getFirst();

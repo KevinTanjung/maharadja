@@ -11,7 +11,6 @@ import edu.uph.learn.maharadja.ui.components.MapPane;
 import edu.uph.learn.maharadja.ui.components.SidePane;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 
 @SuppressWarnings( {"FieldCanBeLocal", "unused"})
 public class GameScene extends Scene {
@@ -26,10 +25,9 @@ public class GameScene extends Scene {
     GameMap gameMap = GameMapLoader.load(MapType.CLASSIC);
     this.gameEngine = new GameEngine(gameMap);
 
-    HBox root = (HBox) getRoot();
-    MapPane mapPane = new MapPane(gameMap);
-    HBox.setHgrow(mapPane, Priority.ALWAYS);
-    SidePane sidePane = new SidePane();
-    root.getChildren().addAll(mapPane, sidePane);
+    ((HBox) getRoot()).getChildren().addAll(
+        new MapPane(gameMap),
+        new SidePane()
+    );
   }
 }

@@ -20,6 +20,8 @@ public class MapTile extends Polygon {
   private final Territory territory;
   private final Region region;
   private final TileType tileType;
+  private final int q;
+  private final int r;
   //private final Text label;
 
   public MapTile(int q, int r) {
@@ -32,6 +34,8 @@ public class MapTile extends Polygon {
 
   private MapTile(Territory territory, Region region, int q, int r, TileType tileType) {
     super();
+    this.q = q;
+    this.r = r;
     this.territory = territory;
     this.region = region;
     this.tileType = tileType;
@@ -107,5 +111,24 @@ public class MapTile extends Polygon {
       setCursor(Cursor.DEFAULT);
     });
     setOnMouseClicked(e -> EventBus.emit(new MapTileSelectedEvent(this)));
+  }
+
+  @Override
+  public final boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (!(object instanceof MapTile mapTile)) {
+      return false;
+    }
+
+    return q == mapTile.q && r == mapTile.r;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = q;
+    result = 31 * result + r;
+    return result;
   }
 }

@@ -2,7 +2,7 @@ package edu.uph.learn.maharadja.ui.components;
 
 import edu.uph.learn.maharadja.map.Region;
 import edu.uph.learn.maharadja.map.Territory;
-import edu.uph.learn.maharadja.ui.components.SidePlayerTab.FXTerritory;
+import edu.uph.learn.maharadja.ui.components.PlayerTab.FXTerritory;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TestSidePlayerTabFXTerritory {
+class TestPlayerTabFXTerritory {
   @Test
   public void sortByTroopNumbers() {
     Region region = new Region("Sumatra");

@@ -12,8 +12,9 @@ import java.util.List;
 public class GameState {
   private boolean started;
   private int activeTurn;
+  private TurnPhase activeTurnPhase;
   private Player thisPlayer;
-  private final List<Player> playerList = new LinkedList<>();
+  private List<Player> playerList = new LinkedList<>();
   private GameMap gameMap;
 
   //region Singleton
@@ -49,23 +50,12 @@ public class GameState {
     }
 
     started = true;
+    playerList = List.copyOf(playerList);
     return StartResult.SUCCESS;
   }
 
-  public static Player me() {
+  public Player me() {
     return get().thisPlayer;
-  }
-
-  public static List<Player> getPlayerList() {
-    return get().playerList;
-  }
-
-  public static GameMap getGameMap() {
-    return get().gameMap;
-  }
-
-  public static void setGameMap(GameMap gameMap) {
-    GameStateHolder.INSTANCE.gameMap = gameMap;
   }
 
   public RegisterPlayerResult registerPlayer(Player player) {
@@ -97,12 +87,28 @@ public class GameState {
     return playerList.get(activeTurn);
   }
 
-  public void nextTurn() {
-    if (activeTurn == playerList.size() - 1) {
-      activeTurn = 0;
-    } else {
-      activeTurn++;
-    }
+  public List<Player> getPlayerList() {
+    return playerList;
+  }
+
+  public GameMap getGameMap() {
+    return gameMap;
+  }
+
+  void setGameMap(GameMap gameMap) {
+    this.gameMap = gameMap;
+  }
+
+  void setActiveTurn(int activeTurn) {
+    this.activeTurn = activeTurn;
+  }
+
+  public TurnPhase getActiveTurnPhase() {
+    return activeTurnPhase;
+  }
+
+  void setActiveTurnPhase(TurnPhase activeTurnPhase) {
+    this.activeTurnPhase = activeTurnPhase;
   }
 
   private int getNonComputerPlayer() {
