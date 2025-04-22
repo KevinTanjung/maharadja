@@ -1,8 +1,15 @@
 package edu.uph.learn.maharadja.game;
 
 import edu.uph.learn.maharadja.common.Constant;
+import edu.uph.learn.maharadja.event.EventBus;
+import edu.uph.learn.maharadja.game.event.AttackPhaseEvent;
+import edu.uph.learn.maharadja.game.event.FortifyPhaseEvent;
+import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
+import edu.uph.learn.maharadja.game.event.ReinforcementPhaseEvent;
+import edu.uph.learn.maharadja.game.event.SkipPhaseEvent;
 import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.Territory;
+import edu.uph.learn.maharadja.utils.TerritoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +20,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import static edu.uph.learn.maharadja.game.event.SkipPhaseEvent.SkipReason.NO_DEPLOYABLE_TROOP;
+
+@SuppressWarnings("StatementWithEmptyBody")
 public class GameEngine {
   private static final Random RANDOM = new SecureRandom();
   private static final Logger log = LoggerFactory.getLogger(GameEngine.class);
@@ -26,12 +36,12 @@ public class GameEngine {
   public GameEngine(GameMap gameMap, GameState gameState) {
     this.gameMap = gameMap;
     this.gameState = gameState;
-    getGameState().setGameMap(gameMap);
-    assignTiles();
-    getGameState().setActiveTurnPhase(TurnPhase.REINFORCEMENT);
+    GameEngine.this.gameState.setGameMap(gameMap);
+    initialDistribution();
+    nextPhase();
   }
 
-  private void assignTiles() {
+  private void initialDistribution() {
     Set<Territory> visitedTerritories = new HashSet<>();
     List<Territory> territories = gameMap.getAllTerritories();
     int territoryCount = territories.size();
@@ -59,8 +69,8 @@ public class GameEngine {
     }
     //endregion
 
-    //region 2. Assign remaining Troop randomly per playe
-    for (Player player : getGameState().getPlayerList()) {
+    //region 2. Assign remaining Troop randomly per player
+    for (Player player : gameState.getPlayerList()) {
       List<Territory> occupiedTerritories = new ArrayList<>(player.getTerritories());
       // since initially set to 1, number of territory equals the number of troops
       int troopCount = occupiedTerritories.size();
@@ -79,27 +89,72 @@ public class GameEngine {
   }
 
   private void nextTurn() {
-    int activeTurn = getGameState().getPlayerList().indexOf(getGameState().currentTurn());
+    int activeTurn = gameState.getPlayerList().indexOf(gameState.currentTurn());
     if (activeTurn == Constant.MAX_PLAYERS - 1) {
-      getGameState().setActiveTurn(0);
+      gameState.setActiveTurn(0);
     } else {
-      getGameState().setActiveTurn(activeTurn + 1);
+      gameState.setActiveTurn(activeTurn + 1);
     }
   }
 
   public void nextPhase() {
-    switch (getGameState().getActiveTurnPhase()) {
-      case REINFORCEMENT -> gameState.setActiveTurnPhase(TurnPhase.ATTACK);
-      case ATTACK -> gameState.setActiveTurnPhase(TurnPhase.FORTIFY);
-      case FORTIFY -> {
-        gameState.setActiveTurnPhase(TurnPhase.REINFORCEMENT);
-        nextTurn();
-      }
+    TurnPhase nextPhase = switch (gameState.getActiveTurnPhase()) {
+      case START -> TurnPhase.REINFORCEMENT;
+      case REINFORCEMENT -> TurnPhase.ATTACK;
+      case ATTACK -> TurnPhase.FORTIFY;
+      case FORTIFY -> TurnPhase.START;
+    };
+
+    gameState.setActiveTurnPhase(nextPhase);
+    EventBus.emit(new GamePhaseEvent(gameState.currentTurn(), nextPhase));
+
+    switch (nextPhase) {
+      case START -> nextTurn();
+      case REINFORCEMENT -> reinforceTroops();
+      case ATTACK -> attackTroops();
+      case FORTIFY -> fortifyTroops();
+    }
+  }
+
+  private void reinforceTroops() {
+    Player currentPlayer = gameState.currentTurn();
+    int numOfTroops = currentPlayer.getTerritories().size() / 3;
+    EventBus.emit(new ReinforcementPhaseEvent(currentPlayer, numOfTroops));
+    if (currentPlayer.isComputer()) {
+      // TODO: aiEngine.reinforceTroops(currentPlayer, numOfTroops);
+    }
+  }
+
+  private void attackTroops() {
+    Player currentPlayer = gameState.currentTurn();
+    List<Territory> deployableTerritories = TerritoryUtil.getDeployableTerritories(currentPlayer);
+    if (deployableTerritories.isEmpty()) {
+      EventBus.emit(new SkipPhaseEvent(currentPlayer, NO_DEPLOYABLE_TROOP));
+      nextPhase();
+      return;
+    }
+    EventBus.emit(new AttackPhaseEvent(currentPlayer, deployableTerritories));
+    if (currentPlayer.isComputer()) {
+      // TODO: aiEngine.attackTroops()
+    }
+  }
+
+  private void fortifyTroops() {
+    Player currentPlayer = gameState.currentTurn();
+    List<Territory> deployableTerritories = TerritoryUtil.getDeployableTerritories(currentPlayer);
+    if (deployableTerritories.isEmpty()) {
+      EventBus.emit(new SkipPhaseEvent(currentPlayer, NO_DEPLOYABLE_TROOP));
+      nextPhase();
+      return;
+    }
+    EventBus.emit(new FortifyPhaseEvent(currentPlayer, deployableTerritories));
+    if (currentPlayer.isComputer()) {
+      // TODO: aiEngine.fortifyTroops()
     }
   }
 
   public void occupyTerritory(Territory territory, int playerIdx, int movedTroop) {
-    occupyTerritory(territory, getGameState().getPlayerList().get(playerIdx), movedTroop);
+    occupyTerritory(territory, gameState.getPlayerList().get(playerIdx), movedTroop);
   }
 
   public void occupyTerritory(Territory territory, Player player, int movedTroop) {
@@ -111,9 +166,5 @@ public class GameEngine {
         "[Player {}] occupied the territory [{}/{}] and deployed [{} troop], now has [{} troop].",
         player.getUsername(), territory.getName(), territory.getRegion().getName(), movedTroop, territory.getNumberOfStationedTroops()
     );
-  }
-
-  private GameState getGameState() {
-    return gameState;
   }
 }

@@ -32,7 +32,7 @@ public class EventBus {
   }
 
   @SuppressWarnings("unchecked")
-  public static  <T extends Event> void emit(T event) {
+  public static <T extends Event> void emit(T event) {
     List<EventListener<? extends Event>> listeners = EventBusHolder.INSTANCE.listenerMap.getOrDefault(
         event.getClass(),
         List.of()

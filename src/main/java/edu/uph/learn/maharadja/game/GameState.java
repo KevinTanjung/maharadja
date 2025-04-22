@@ -20,6 +20,9 @@ public class GameState {
   //region Singleton
   // VisibleForTesting
   GameState() {
+    started = false;
+    activeTurn = 0;
+    activeTurnPhase = TurnPhase.START;
     // First, fill all players with Computer
     for (int i = 1; i <= Constant.MAX_PLAYERS; i++) {
       playerList.add(Player.computer(i));
