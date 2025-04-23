@@ -24,6 +24,7 @@ public class Player {
   private boolean computer;
   private Color color;
   private final Set<Territory> territories = new HashSet<>();
+  private boolean forfeited;
 
   public static Player user(String username) {
     Player player = new Player();
@@ -70,6 +71,14 @@ public class Player {
 
   public void addTerritory(Territory territory) {
     territories.add(territory);
+  }
+
+  public boolean isForfeited() {
+    return forfeited;
+  }
+
+  public void setForfeited(boolean forfeited) {
+    this.forfeited = forfeited;
   }
 
   @Override

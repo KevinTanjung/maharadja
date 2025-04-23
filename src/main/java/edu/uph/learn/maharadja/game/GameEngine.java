@@ -5,6 +5,7 @@ import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.event.AttackPhaseEvent;
 import edu.uph.learn.maharadja.game.event.FortifyPhaseEvent;
 import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
+import edu.uph.learn.maharadja.game.event.PlayerForfeitEvent;
 import edu.uph.learn.maharadja.game.event.ReinforcementPhaseEvent;
 import edu.uph.learn.maharadja.game.event.SkipPhaseEvent;
 import edu.uph.learn.maharadja.map.GameMap;
@@ -98,6 +99,12 @@ public class GameEngine {
   }
 
   public void nextPhase() {
+    Player currentPlayer = gameState.currentTurn();
+    if (gameState.currentTurn().isForfeited()) {
+      EventBus.emit(new SkipPhaseEvent(currentPlayer, SkipPhaseEvent.SkipReason.PLAYER_FORFEIT));
+      gameState.setActiveTurnPhase(TurnPhase.FORTIFY);
+    }
+
     TurnPhase nextPhase = switch (gameState.getActiveTurnPhase()) {
       case START -> TurnPhase.REINFORCEMENT;
       case REINFORCEMENT -> TurnPhase.ATTACK;
@@ -106,18 +113,21 @@ public class GameEngine {
     };
 
     gameState.setActiveTurnPhase(nextPhase);
-    EventBus.emit(new GamePhaseEvent(gameState.currentTurn(), nextPhase));
+    EventBus.emit(new GamePhaseEvent(currentPlayer, nextPhase));
 
     switch (nextPhase) {
-      case START -> nextTurn();
-      case REINFORCEMENT -> reinforceTroops();
-      case ATTACK -> attackTroops();
-      case FORTIFY -> fortifyTroops();
+      case START -> {
+        checkLosingCondition(currentPlayer);
+        checkWinningCondition();
+        nextTurn();
+      }
+      case REINFORCEMENT -> reinforceTroops(currentPlayer);
+      case ATTACK -> attackTroops(currentPlayer);
+      case FORTIFY -> fortifyTroops(currentPlayer);
     }
   }
 
-  private void reinforceTroops() {
-    Player currentPlayer = gameState.currentTurn();
+  private void reinforceTroops(Player currentPlayer) {
     int numOfTroops = currentPlayer.getTerritories().size() / 3;
     EventBus.emit(new ReinforcementPhaseEvent(currentPlayer, numOfTroops));
     if (currentPlayer.isComputer()) {
@@ -125,8 +135,7 @@ public class GameEngine {
     }
   }
 
-  private void attackTroops() {
-    Player currentPlayer = gameState.currentTurn();
+  private void attackTroops(Player currentPlayer) {
     List<Territory> deployableTerritories = TerritoryUtil.getDeployableTerritories(currentPlayer);
     if (deployableTerritories.isEmpty()) {
       EventBus.emit(new SkipPhaseEvent(currentPlayer, NO_DEPLOYABLE_TROOP));
@@ -139,8 +148,7 @@ public class GameEngine {
     }
   }
 
-  private void fortifyTroops() {
-    Player currentPlayer = gameState.currentTurn();
+  private void fortifyTroops(Player currentPlayer) {
     List<Territory> deployableTerritories = TerritoryUtil.getDeployableTerritories(currentPlayer);
     if (deployableTerritories.isEmpty()) {
       EventBus.emit(new SkipPhaseEvent(currentPlayer, NO_DEPLOYABLE_TROOP));
@@ -166,5 +174,20 @@ public class GameEngine {
         "[Player {}] occupied the territory [{}/{}] and deployed [{} troop], now has [{} troop].",
         player.getUsername(), territory.getName(), territory.getRegion().getName(), movedTroop, territory.getNumberOfStationedTroops()
     );
+  }
+
+  private void checkWinningCondition() {
+    // TODO impl
+  }
+
+  private void checkLosingCondition(Player player) {
+    if (player.isForfeited()) {
+      return;
+    }
+
+    if (player.getTerritories().isEmpty()) {
+      player.setForfeited(true);
+      EventBus.emit(new PlayerForfeitEvent(player));
+    }
   }
 }

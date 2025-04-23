@@ -5,8 +5,8 @@ import edu.uph.learn.maharadja.game.Player;
 
 public record SkipPhaseEvent(Player player,
                              SkipReason reason) implements Event {
-  public static enum SkipReason {
-    PLAYER_LOST,
+  public enum SkipReason {
+    PLAYER_FORFEIT,
     NO_DEPLOYABLE_TROOP
   }
 }
