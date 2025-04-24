@@ -1,5 +1,6 @@
 package edu.uph.learn.maharadja.event;
 
+import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,9 +43,21 @@ public class EventBus {
         event.getClass(),
         List.of()
     );
-    LOG.info("Emitted Event: {}, invoking {} listeners", event.getEventName(), listeners.size());
+    LOG.info("[{}] Invoking {} listeners", event.getEventName(), listeners.size());
+
     for (EventListener<? extends Event> listener : listeners) {
-      ((EventListener<T>) listener).onEvent(event);
+      Runnable task = () -> {
+        try {
+          ((EventListener<T>) listener).onEvent(event);
+        } catch (Exception e) {
+          LOG.error("[{}] Exception!", event.getEventName(), e);
+        }
+      };
+      if (Platform.isFxApplicationThread()) {
+        task.run();
+      } else {
+        Platform.runLater(task);
+      }
     }
   }
 }

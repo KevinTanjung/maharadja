@@ -55,6 +55,7 @@ public class GameEngine {
           entry.getKey()
       ));
     }
+    nextPhase();
   }
 
   private static class GameEngineHolder {

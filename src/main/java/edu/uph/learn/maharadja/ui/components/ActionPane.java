@@ -6,13 +6,13 @@ import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.GameState;
 import edu.uph.learn.maharadja.game.TurnPhase;
 import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
+import edu.uph.learn.maharadja.ui.TextResource;
 import edu.uph.learn.maharadja.ui.event.MapTileSelectedEvent;
+import edu.uph.learn.maharadja.ui.factory.LabelFactory;
 import edu.uph.learn.maharadja.ui.form.ReinforceTroopForm;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import org.slf4j.Logger;
@@ -33,8 +33,7 @@ public class ActionPane extends BorderPane {
     setPrefHeight(UI.ACTION_PANE_HEIGHT);
     setMinHeight(UI.ACTION_PANE_HEIGHT);
     setMaxHeight(UI.ACTION_PANE_HEIGHT);
-
-    setCenter(new Label("Click on a Hex Tile!"));
+    setPadding(new Insets(UI.SMALL));
   }
 
   private void onGamePhase(GamePhaseEvent gamePhaseEvent) {
@@ -63,14 +62,12 @@ public class ActionPane extends BorderPane {
   }
 
   private void renderReinforcementAction() {
-    Label label = new Label("Reinforce Troop!");
-    label.setStyle("-fx-text-fill: " + Color.IVORY_WHITE.toHex());
-    label.setFont(UI.LARGE_FONT);
-    label.setPadding(new Insets(UI.UNIT, UI.SMALL, UI.UNIT, UI.SMALL));
-    label.setMinWidth(UI.TAB_WIDTH);
-    label.setAlignment(Pos.CENTER);
-    label.setBackground(Background.fill(Color.VOLCANIC_BLACK.get()));
-    setTop(label);
+    setTop(LabelFactory.create(
+        TextResource.REINFORCEMENT_TITLE,
+        Color.VOLCANIC_BLACK,
+        Color.IVORY_WHITE,
+        UI.TAB_WIDTH
+    ));
     setCenter(reinforceTroopForm);
     setBottom(reinforceTroopForm.getSubmitButton());
     reinforceTroopForm.setVisible(true);

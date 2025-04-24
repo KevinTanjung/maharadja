@@ -8,6 +8,9 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 
 public class BorderFactory {
+  private BorderFactory() {
+  }
+
   public static Border primary() {
     return color(Color.IMPERIAL_GOLD);
   }

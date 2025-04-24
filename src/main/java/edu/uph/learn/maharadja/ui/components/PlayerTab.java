@@ -11,13 +11,12 @@ import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
 import edu.uph.learn.maharadja.map.Region;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.ui.factory.BorderFactory;
+import edu.uph.learn.maharadja.ui.factory.LabelFactory;
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -35,6 +34,7 @@ import java.util.Objects;
 
 public class PlayerTab extends Tab {
   private static final Logger LOG = LoggerFactory.getLogger(PlayerTab.class);
+
   private final Player player;
   private final Accordion accordion;
   private final Map<Region, FXRegion> regionPanes = new HashMap<>();
@@ -48,26 +48,23 @@ public class PlayerTab extends Tab {
     this.player = player;
     this.accordion = new Accordion();
 
-    renderTabTitle(GameState.get().currentTurn());
     setClosable(false);
 
     // TODO: change from accordion to empty label for "lost"
     ((VBox) getContent()).getChildren().addAll(
-        renderPlayerName(player),
+        LabelFactory.create(
+            player.getUsername(),
+            player.getColor(),
+            Color.IVORY_WHITE,
+            UI.TAB_WIDTH
+        ),
         accordion
     );
-    renderTerritories();
-  }
 
-  private static Label renderPlayerName(Player player) {
-    Label label = new Label(player.getUsername());
-    label.setStyle("-fx-text-fill: " + Color.IVORY_WHITE.toHex());
-    label.setFont(UI.LARGE_FONT);
-    label.setPadding(new Insets(UI.UNIT, UI.SMALL, UI.UNIT, UI.SMALL));
-    label.setMinWidth(UI.TAB_WIDTH);
-    label.setAlignment(Pos.CENTER);
-    label.setBackground(Background.fill(player.getColor().get()));
-    return label;
+    Platform.runLater(() -> {
+      renderTabTitle(GameState.get().currentTurn());
+      renderTerritories();
+    });
   }
 
   private void onGamePhaseEvent(GamePhaseEvent gamePhaseEvent) {
@@ -76,10 +73,6 @@ public class PlayerTab extends Tab {
     if (gamePhaseEvent.phase() == TurnPhase.START) {
       renderTabTitle(gamePhaseEvent.currentPlayer());
     }
-  }
-
-  public void renderTabTitle() {
-    renderTabTitle(null);
   }
 
   public void renderTabTitle(Player currentPlayer) {

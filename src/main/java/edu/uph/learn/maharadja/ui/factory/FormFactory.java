@@ -13,6 +13,9 @@ import static edu.uph.learn.maharadja.common.UI.LARGE_FONT;
 import static edu.uph.learn.maharadja.common.UI.SMALL_FONT;
 
 public class FormFactory {
+  private FormFactory() {
+  }
+
   public static Label label(String text, double width, Aligment aligment) {
     Label label = new Label(text);
     label.setFont(SMALL_FONT);
