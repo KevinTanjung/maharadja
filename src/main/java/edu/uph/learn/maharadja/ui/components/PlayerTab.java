@@ -1,8 +1,12 @@
 package edu.uph.learn.maharadja.ui.components;
 
 import edu.uph.learn.maharadja.common.Color;
+import edu.uph.learn.maharadja.common.UI;
 import edu.uph.learn.maharadja.event.EventBus;
+import edu.uph.learn.maharadja.game.GameState;
 import edu.uph.learn.maharadja.game.Player;
+import edu.uph.learn.maharadja.game.TurnPhase;
+import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
 import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
 import edu.uph.learn.maharadja.map.Region;
 import edu.uph.learn.maharadja.map.Territory;
@@ -12,12 +16,16 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.VBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,26 +34,68 @@ import java.util.Map;
 import java.util.Objects;
 
 public class PlayerTab extends Tab {
+  private static final Logger LOG = LoggerFactory.getLogger(PlayerTab.class);
   private final Player player;
   private final Accordion accordion;
   private final Map<Region, FXRegion> regionPanes = new HashMap<>();
   private final Map<Territory, FXTerritory> territoryLabels = new HashMap<>();
 
   public PlayerTab(Player player) {
-    super(player.getUsername(), new VBox());
-    setClosable(false);
-    setStyle(String.format(
-        "-fx-background-color: %s; -fx-color: %s;",
-        player.getColor().toHex(), Color.IVORY_WHITE.toHex()
-    ));
+    super("  ", new VBox());
+    EventBus.registerListener(TroopMovementEvent.class, this::onTroopMovementEvent);
+    EventBus.registerListener(GamePhaseEvent.class, this::onGamePhaseEvent);
 
     this.player = player;
     this.accordion = new Accordion();
-    EventBus.registerListener(TroopMovementEvent.class, this::onTroopMovementEvent);
+
+    renderTabTitle(GameState.get().currentTurn());
+    setClosable(false);
 
     // TODO: change from accordion to empty label for "lost"
-    ((VBox) getContent()).getChildren().add(accordion);
+    ((VBox) getContent()).getChildren().addAll(
+        renderPlayerName(player),
+        accordion
+    );
     renderTerritories();
+  }
+
+  private static Label renderPlayerName(Player player) {
+    Label label = new Label(player.getUsername());
+    label.setStyle("-fx-text-fill: " + Color.IVORY_WHITE.toHex());
+    label.setFont(UI.LARGE_FONT);
+    label.setPadding(new Insets(UI.UNIT, UI.SMALL, UI.UNIT, UI.SMALL));
+    label.setMinWidth(UI.TAB_WIDTH);
+    label.setAlignment(Pos.CENTER);
+    label.setBackground(Background.fill(player.getColor().get()));
+    return label;
+  }
+
+  private void onGamePhaseEvent(GamePhaseEvent gamePhaseEvent) {
+    LOG.info("[onGamePhase] [{}] Player {} turn, Phase {}", player.getUsername(), gamePhaseEvent.currentPlayer().getUsername(), gamePhaseEvent.phase());
+
+    if (gamePhaseEvent.phase() == TurnPhase.START) {
+      renderTabTitle(gamePhaseEvent.currentPlayer());
+    }
+  }
+
+  public void renderTabTitle() {
+    renderTabTitle(null);
+  }
+
+  public void renderTabTitle(Player currentPlayer) {
+    if (Objects.equals(this.player, currentPlayer)) {
+      setText("   " + player.getUsername() + "   ");
+      setStyle(String.format(
+          "-fx-background-color: %s; -fx-color: %s;",
+          Color.IMPERIAL_GOLD.toHex(), Color.IVORY_WHITE.toHex()
+      ));
+    } else {
+      setText("  ");
+      setStyle(String.format(
+          "-fx-background-color: %s; -fx-color: %s;",
+          this.player.getColor().toHex(), Color.IVORY_WHITE.toHex()
+      ));
+    }
   }
 
   private void onTroopMovementEvent(TroopMovementEvent event) {
@@ -94,7 +144,8 @@ public class PlayerTab extends Tab {
         return;
       }
       territoryList.add(territory);
-      totalTroopsInRegion.set(totalTroopsInRegion.get() + territory.getNumberOfStationedTroops());;
+      totalTroopsInRegion.set(totalTroopsInRegion.get() + territory.getNumberOfStationedTroops());
+      ;
     }
 
     @Override

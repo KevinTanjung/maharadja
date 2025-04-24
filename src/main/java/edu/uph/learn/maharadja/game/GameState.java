@@ -94,6 +94,10 @@ public class GameState {
     return playerList;
   }
 
+  public TurnPhase currentPhase() {
+    return activeTurnPhase;
+  }
+
   public GameMap getGameMap() {
     return gameMap;
   }
@@ -104,10 +108,6 @@ public class GameState {
 
   void setActiveTurn(int activeTurn) {
     this.activeTurn = activeTurn;
-  }
-
-  public TurnPhase getActiveTurnPhase() {
-    return activeTurnPhase;
   }
 
   void setActiveTurnPhase(TurnPhase activeTurnPhase) {

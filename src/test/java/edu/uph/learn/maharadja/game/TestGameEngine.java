@@ -1,7 +1,6 @@
 package edu.uph.learn.maharadja.game;
 
 import edu.uph.learn.maharadja.event.EventBus;
-import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.GameMapLoader;
 import edu.uph.learn.maharadja.map.MapType;
 import org.junit.jupiter.api.Test;
@@ -26,33 +25,33 @@ public class TestGameEngine {
     state.start();
 
     GameEngine engine = new GameEngine(GameMapLoader.load(MapType.CLASSIC), state);
-    assertEquals(TurnPhase.REINFORCEMENT, state.getActiveTurnPhase());
+    assertEquals(TurnPhase.REINFORCEMENT, state.currentPhase());
     assertEquals("Ken Dedes", state.currentTurn().getUsername());
     assertFalse(state.currentTurn().isComputer());
     engine.nextPhase();
-    assertEquals(TurnPhase.ATTACK, state.getActiveTurnPhase());
+    assertEquals(TurnPhase.ATTACK, state.currentPhase());
     assertEquals("Ken Dedes", state.currentTurn().getUsername());
     assertFalse(state.currentTurn().isComputer());
     engine.nextPhase();
-    assertEquals(TurnPhase.FORTIFY, state.getActiveTurnPhase());
+    assertEquals(TurnPhase.FORTIFY, state.currentPhase());
     assertEquals("Ken Dedes", state.currentTurn().getUsername());
     assertFalse(state.currentTurn().isComputer());
 
     // next user
     engine.nextPhase();
-    assertEquals(TurnPhase.START, state.getActiveTurnPhase());
+    assertEquals(TurnPhase.START, state.currentPhase());
     assertEquals("Ken Arok", state.currentTurn().getUsername());
     assertFalse(state.currentTurn().isComputer());
     engine.nextPhase();
-    assertEquals(TurnPhase.REINFORCEMENT, state.getActiveTurnPhase());
+    assertEquals(TurnPhase.REINFORCEMENT, state.currentPhase());
     assertEquals("Ken Arok", state.currentTurn().getUsername());
     assertFalse(state.currentTurn().isComputer());
     engine.nextPhase();
-    assertEquals(TurnPhase.ATTACK, state.getActiveTurnPhase());
+    assertEquals(TurnPhase.ATTACK, state.currentPhase());
     assertEquals("Ken Arok", state.currentTurn().getUsername());
     assertFalse(state.currentTurn().isComputer());
     engine.nextPhase();
-    assertEquals(TurnPhase.FORTIFY, state.getActiveTurnPhase());
+    assertEquals(TurnPhase.FORTIFY, state.currentPhase());
     assertEquals("Ken Arok", state.currentTurn().getUsername());
     assertFalse(state.currentTurn().isComputer());
 

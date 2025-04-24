@@ -5,7 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.Background;
 
 import static edu.uph.learn.maharadja.common.Constant.HEIGHT_NORMAL;
-import static edu.uph.learn.maharadja.common.Constant.SMALL_FONT;
+import static edu.uph.learn.maharadja.common.UI.SMALL_FONT;
 
 public class ButtonFactory {
   public static Button primary(String label, double width) {

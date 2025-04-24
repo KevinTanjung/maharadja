@@ -8,7 +8,8 @@ import edu.uph.learn.maharadja.controller.common.ControllerFactory;
 import edu.uph.learn.maharadja.controller.common.Message;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,12 +43,12 @@ import java.util.concurrent.TimeUnit;
  *   <li>Broadcast game state updates and synchronize actions across clients.</li>
  * </ol>
  */
-@Slf4j
 public class GameServer {
   public static final int DEFAULT_PORT = 12000;
   public static final int BROADCAST_PORT = 12222;
   public static final long BROADCAST_INTERVAL = TimeUnit.SECONDS.toMillis(5);
   public static final String BROADCAST_MESSAGE = "MAHARADJA_SERVER";
+  private static final Logger log = LoggerFactory.getLogger(GameServer.class);
 
   //region Server State
   private static boolean started;

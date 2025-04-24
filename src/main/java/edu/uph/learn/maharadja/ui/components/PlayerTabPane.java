@@ -1,15 +1,28 @@
 package edu.uph.learn.maharadja.ui.components;
 
 import edu.uph.learn.maharadja.common.UI;
+import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.GameState;
 import edu.uph.learn.maharadja.game.Player;
+import edu.uph.learn.maharadja.game.TurnPhase;
+import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Side;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class PlayerTabPane extends TabPane {
+  private final Map<Player, PlayerTab> playerTabMapping = new HashMap<>();
+
   public PlayerTabPane() {
+    EventBus.registerListener(GamePhaseEvent.class, this::onGamePhaseEvent);
+
     // tab title position
     setSide(Side.RIGHT);
     setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
@@ -22,7 +35,26 @@ public class PlayerTabPane extends TabPane {
 
     // player tabs
     for (Player player : GameState.get().getPlayerList()) {
-      getTabs().add(new PlayerTab(player));
+      PlayerTab playerTab = new PlayerTab(player);
+      playerTabMapping.put(player, playerTab);
+      getTabs().add(playerTab);
+    }
+
+    getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+      for (Map.Entry<Player, PlayerTab> entry : playerTabMapping.entrySet()) {
+        if (newVal == entry.getValue()) {
+          entry.getValue().renderTabTitle(entry.getKey());
+        } else {
+          entry.getValue().renderTabTitle(null);
+        }
+      }
+    });
+  }
+
+  private void onGamePhaseEvent(GamePhaseEvent gamePhaseEvent) {
+    if (gamePhaseEvent.phase() == TurnPhase.START) {
+      PlayerTab currentTurnTab = playerTabMapping.get(gamePhaseEvent.currentPlayer());
+      getSelectionModel().select(currentTurnTab);
     }
   }
 }

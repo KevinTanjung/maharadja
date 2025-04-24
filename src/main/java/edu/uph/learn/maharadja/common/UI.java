@@ -1,7 +1,12 @@
 package edu.uph.learn.maharadja.common;
 
+import javafx.scene.text.Font;
+
 public class UI {
   private UI() {}
+
+  public static final double UNIT = 8;
+  public static final double SMALL = UNIT / 2;
 
   public static final double WIDTH = 960;
   public static final double HEIGHT = 540;
@@ -10,6 +15,9 @@ public class UI {
 
   public static final double MIN_SCALE = 1;
   public static final double MAX_SCALE = 2;
-  public static final double HEX_SIZE = 40;
+  public static final double HEX_SIZE = UNIT * 5;
   public static final double ZOOM_STEP = 1.01;
+
+  public static final Font SMALL_FONT = new Font("Verdana Bold", 12);
+  public static final Font LARGE_FONT = new Font("Verdana Bold", 16);
 }

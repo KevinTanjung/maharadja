@@ -9,8 +9,8 @@ import javafx.scene.text.TextAlignment;
 
 import static edu.uph.learn.maharadja.common.Constant.HEIGHT_NORMAL;
 import static edu.uph.learn.maharadja.common.Constant.HEIGHT_SMALL;
-import static edu.uph.learn.maharadja.common.Constant.LARGE_FONT;
-import static edu.uph.learn.maharadja.common.Constant.SMALL_FONT;
+import static edu.uph.learn.maharadja.common.UI.LARGE_FONT;
+import static edu.uph.learn.maharadja.common.UI.SMALL_FONT;
 
 public class FormFactory {
   public static Label label(String text, double width, Aligment aligment) {

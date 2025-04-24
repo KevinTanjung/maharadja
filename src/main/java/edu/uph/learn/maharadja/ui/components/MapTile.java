@@ -51,6 +51,10 @@ public class MapTile extends Polygon {
     setTranslateX(x);
     setTranslateY(y);
 
+    render();
+  }
+
+  public void render() {
     if (region == null) {
       setStroke(javafx.scene.paint.Color.web(Color.SKY_BLUE.toHex(), 0.3));
       setFill(Color.ALICE_BLUE.get());

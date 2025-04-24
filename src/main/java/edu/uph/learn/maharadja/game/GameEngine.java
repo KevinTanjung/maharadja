@@ -8,6 +8,7 @@ import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
 import edu.uph.learn.maharadja.game.event.PlayerForfeitEvent;
 import edu.uph.learn.maharadja.game.event.ReinforcementPhaseEvent;
 import edu.uph.learn.maharadja.game.event.SkipPhaseEvent;
+import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
 import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.utils.TerritoryUtil;
@@ -18,6 +19,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -30,17 +32,44 @@ public class GameEngine {
   private final GameMap gameMap;
   private final GameState gameState;
 
-  public GameEngine(GameMap gameMap) {
+  //region Singleton
+  GameEngine(GameMap gameMap) {
     this(gameMap, GameState.get());
   }
 
-  public GameEngine(GameMap gameMap, GameState gameState) {
+  GameEngine(GameMap gameMap, GameState gameState) {
     this.gameMap = gameMap;
     this.gameState = gameState;
-    GameEngine.this.gameState.setGameMap(gameMap);
+    gameState.setGameMap(gameMap);
     initialDistribution();
     nextPhase();
   }
+
+  public void reinforceTroop(Map<Territory, Integer> troopReinforcement) {
+    for (Map.Entry<Territory, Integer> entry : troopReinforcement.entrySet()) {
+      entry.getKey().deployTroop(entry.getValue());
+      EventBus.emit(new TroopMovementEvent(
+          GameState.get().currentTurn(),
+          GameState.get().currentPhase(),
+          null,
+          entry.getKey()
+      ));
+    }
+  }
+
+  private static class GameEngineHolder {
+    private static GameEngine INSTANCE;
+  }
+
+  public static GameEngine init(GameMap gameMap) {
+    GameEngineHolder.INSTANCE = new GameEngine(gameMap);
+    return GameEngineHolder.INSTANCE;
+  }
+
+  public static GameEngine get() {
+    return GameEngineHolder.INSTANCE;
+  }
+  //endregion
 
   private void initialDistribution() {
     Set<Territory> visitedTerritories = new HashSet<>();
@@ -105,7 +134,7 @@ public class GameEngine {
       gameState.setActiveTurnPhase(TurnPhase.FORTIFY);
     }
 
-    TurnPhase nextPhase = switch (gameState.getActiveTurnPhase()) {
+    TurnPhase nextPhase = switch (gameState.currentPhase()) {
       case START -> TurnPhase.REINFORCEMENT;
       case REINFORCEMENT -> TurnPhase.ATTACK;
       case ATTACK -> TurnPhase.FORTIFY;
@@ -128,7 +157,7 @@ public class GameEngine {
   }
 
   private void reinforceTroops(Player currentPlayer) {
-    int numOfTroops = currentPlayer.getTerritories().size() / 3;
+    int numOfTroops = Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(),  3));
     EventBus.emit(new ReinforcementPhaseEvent(currentPlayer, numOfTroops));
     if (currentPlayer.isComputer()) {
       // TODO: aiEngine.reinforceTroops(currentPlayer, numOfTroops);
@@ -174,6 +203,8 @@ public class GameEngine {
         "[Player {}] occupied the territory [{}/{}] and deployed [{} troop], now has [{} troop].",
         player.getUsername(), territory.getName(), territory.getRegion().getName(), movedTroop, territory.getNumberOfStationedTroops()
     );
+
+    EventBus.emit(new TroopMovementEvent(player, null, null, territory));
   }
 
   private void checkWinningCondition() {

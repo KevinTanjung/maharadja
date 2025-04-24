@@ -23,11 +23,12 @@ public class GameScene extends Scene {
     setFill(Color.IVORY_WHITE.get());
 
     GameMap gameMap = GameMapLoader.load(MapType.CLASSIC);
-    this.gameEngine = new GameEngine(gameMap);
-
     ((HBox) getRoot()).getChildren().addAll(
         new MapPane(gameMap),
         new SidePane()
     );
+
+    // ensure GameEngine is initialized last after all components register the listener to EventBus
+    this.gameEngine = GameEngine.init(gameMap);
   }
 }

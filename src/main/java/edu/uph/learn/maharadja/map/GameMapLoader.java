@@ -1,7 +1,6 @@
 package edu.uph.learn.maharadja.map;
 
 import edu.uph.learn.maharadja.common.Color;
-import edu.uph.learn.maharadja.game.GameState;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
@@ -13,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static edu.uph.learn.maharadja.common.ObjectMapperUtil.OBJECT_MAPPER;
+import static edu.uph.learn.maharadja.utils.ObjectMapperUtil.OBJECT_MAPPER;
 
 /**
  * Helper to load the map from a JSON file into our desired data structure stored in {@link GameMap}.
