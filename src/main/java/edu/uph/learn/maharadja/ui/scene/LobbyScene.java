@@ -5,6 +5,7 @@ import edu.uph.learn.maharadja.common.Constant;
 import edu.uph.learn.maharadja.ui.GameWindow;
 import edu.uph.learn.maharadja.ui.factory.ButtonFactory;
 import edu.uph.learn.maharadja.ui.factory.FormFactory;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -21,10 +22,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import static edu.uph.learn.maharadja.common.Constant.DEFAULT_WIDTH;
+import static edu.uph.learn.maharadja.common.UI.FORM_WIDTH;
 
 public class LobbyScene extends Scene {
-  private static final double FORM_WIDTH = 420;
   private final GameWindow gameWindow;
+  private final SimpleStringProperty usernameProperty = new SimpleStringProperty("");
+
   private TextField usernameField;
 
   public LobbyScene(GameWindow gameWindow) {
@@ -42,7 +45,7 @@ public class LobbyScene extends Scene {
   private void renderLogo() {
     ImageView imageView = new ImageView(new Image("assets/logo_gold.png"));
     imageView.setFitWidth(FORM_WIDTH);
-    imageView.setFitHeight(FORM_WIDTH/2);
+    imageView.setFitHeight(FORM_WIDTH / 2);
     imageView.setPickOnBounds(true);
     imageView.setPreserveRatio(true);
     BorderPane.setAlignment(imageView, Pos.CENTER);
@@ -50,7 +53,7 @@ public class LobbyScene extends Scene {
   }
 
   private void renderPlayerRegistration() {
-    double padding = (DEFAULT_WIDTH-FORM_WIDTH)/2;
+    double padding = (DEFAULT_WIDTH - FORM_WIDTH) / 2;
     VBox container = new VBox();
     container.setPadding(new Insets(0, padding, 0, padding));
     container.setMinWidth(FORM_WIDTH);
@@ -61,6 +64,7 @@ public class LobbyScene extends Scene {
     container.getChildren().add(errorLabel);
     container.getChildren().add(FormFactory.label("USERNAME", FORM_WIDTH, FormFactory.Aligment.CENTER));
     usernameField = FormFactory.textField(FORM_WIDTH);
+    usernameField.textProperty().bindBidirectional(usernameProperty);
     container.getChildren().add(usernameField);
     //endregion
 
@@ -70,10 +74,12 @@ public class LobbyScene extends Scene {
     Button serverButton = ButtonFactory.primary("HOST", width);
     HBox.setMargin(serverButton, new Insets(8, 16, 0, 0));
     serverButton.setOnAction(new ButtonHandler(true));
+    serverButton.disableProperty().bind(usernameProperty.isEmpty());
 
     Button clientButton = ButtonFactory.primary("JOIN", width);
     HBox.setMargin(clientButton, new Insets(8, 0, 0, 0));
     clientButton.setOnAction(new ButtonHandler(false));
+    clientButton.disableProperty().bind(usernameProperty.isEmpty());
 
     container.getChildren().add(new HBox(serverButton, clientButton));
     //endregion
