@@ -218,11 +218,7 @@ public class GameEngine {
   }
 
   public void occupyTerritory(Territory territory, int playerIdx, int movedTroop) {
-    occupyTerritory(territory, gameState.getPlayerList().get(playerIdx), movedTroop);
-  }
-
-  public void occupyTerritory(Territory territory, Player player, int movedTroop) {
-    occupyTerritory(territory, player, movedTroop, null);
+    occupyTerritory(territory, gameState.getPlayerList().get(playerIdx), movedTroop, null);
   }
 
   public void occupyTerritory(Territory source, Territory destination, int movedTroop) {
