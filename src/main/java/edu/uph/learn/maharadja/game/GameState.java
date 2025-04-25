@@ -34,7 +34,9 @@ public class GameState {
   }
 
   public static GameState init() {
-    GameStateHolder.INSTANCE = new GameState();
+    if (GameStateHolder.INSTANCE == null) {
+      GameStateHolder.INSTANCE = new GameState();
+    }
     return GameStateHolder.INSTANCE;
   }
 
