@@ -7,28 +7,34 @@ import edu.uph.learn.maharadja.game.event.FortifyPhaseEvent;
 import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
 import edu.uph.learn.maharadja.game.event.PlayerForfeitEvent;
 import edu.uph.learn.maharadja.game.event.DraftPhaseEvent;
+import edu.uph.learn.maharadja.game.event.RegionOccupiedEvent;
 import edu.uph.learn.maharadja.game.event.SkipPhaseEvent;
+import edu.uph.learn.maharadja.game.event.TerritoryOccupiedEvent;
 import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
 import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.Territory;
+import edu.uph.learn.maharadja.utils.DiceRoll;
 import edu.uph.learn.maharadja.utils.TerritoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static edu.uph.learn.maharadja.game.event.SkipPhaseEvent.SkipReason.NO_DEPLOYABLE_TROOP;
 
 @SuppressWarnings("StatementWithEmptyBody")
 public class GameEngine {
   private static final Random RANDOM = new SecureRandom();
-  private static final Logger log = LoggerFactory.getLogger(GameEngine.class);
+  private static final Logger LOG = LoggerFactory.getLogger(GameEngine.class);
   private final GameMap gameMap;
   private final GameState gameState;
 
@@ -49,8 +55,8 @@ public class GameEngine {
     for (Map.Entry<Territory, Integer> entry : draftTroopMapping.entrySet()) {
       entry.getKey().deployTroop(entry.getValue());
       EventBus.emit(new TroopMovementEvent(
-          GameState.get().currentTurn(),
-          GameState.get().currentPhase(),
+          gameState.currentTurn(),
+          gameState.currentPhase(),
           null,
           entry.getKey()
       ));
@@ -110,7 +116,7 @@ public class GameEngine {
         territory.deployTroop(1);
         troopCount++;
 
-        log.info(
+        LOG.info(
             "[Player {}] deployed [1 troop] to territory [{}/{}], now has [{} troop].",
             player.getUsername(), territory.getName(), territory.getRegion().getName(), territory.getNumberOfStationedTroops()
         );
@@ -151,13 +157,13 @@ public class GameEngine {
         checkWinningCondition();
         nextTurn();
       }
-      case DRAFT -> draftTroops(currentPlayer);
-      case ATTACK -> attackTerritories(currentPlayer);
-      case FORTIFY -> fortifyTerritories(currentPlayer);
+      case DRAFT -> prepareTroopsDraft(currentPlayer);
+      case ATTACK -> prepareTerritoryAttack(currentPlayer);
+      case FORTIFY -> prepareTerritoryFortification(currentPlayer);
     }
   }
 
-  private void draftTroops(Player currentPlayer) {
+  private void prepareTroopsDraft(Player currentPlayer) {
     int numOfTroops = Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(),  3));
     EventBus.emit(new DraftPhaseEvent(currentPlayer, numOfTroops));
     if (currentPlayer.isComputer()) {
@@ -165,8 +171,20 @@ public class GameEngine {
     }
   }
 
-  private void attackTerritories(Player currentPlayer) {
-    List<Territory> deployableTerritories = TerritoryUtil.getDeployableTerritories(currentPlayer);
+  public void prepareTerritoryAttack(Player currentPlayer) {
+    List<Territory> deployableTerritories = TerritoryUtil.getDeployableTerritories(currentPlayer)
+        .stream()
+        .filter(territory -> {
+          boolean atLeastOneAttackable = false;
+          for (Territory neighbor : gameMap.getAdjacentTerritories(territory)) {
+            if (gameMap.isAttackable(territory, neighbor)) {
+              atLeastOneAttackable = true;
+              break;
+            }
+          }
+          return atLeastOneAttackable;
+        })
+        .toList();
     if (deployableTerritories.isEmpty()) {
       EventBus.emit(new SkipPhaseEvent(currentPlayer, NO_DEPLOYABLE_TROOP));
       nextPhase();
@@ -178,7 +196,7 @@ public class GameEngine {
     }
   }
 
-  private void fortifyTerritories(Player currentPlayer) {
+  private void prepareTerritoryFortification(Player currentPlayer) {
     List<Territory> deployableTerritories = TerritoryUtil.getDeployableTerritories(currentPlayer);
     if (deployableTerritories.isEmpty()) {
       EventBus.emit(new SkipPhaseEvent(currentPlayer, NO_DEPLOYABLE_TROOP));
@@ -196,16 +214,98 @@ public class GameEngine {
   }
 
   public void occupyTerritory(Territory territory, Player player, int movedTroop) {
-    territory.setOwner(player);
-    territory.deployTroop(movedTroop);
-    player.addTerritory(territory);
+    occupyTerritory(territory, player, movedTroop, null);
+  }
 
-    log.info(
-        "[Player {}] occupied the territory [{}/{}] and deployed [{} troop], now has [{} troop].",
-        player.getUsername(), territory.getName(), territory.getRegion().getName(), movedTroop, territory.getNumberOfStationedTroops()
+  public void occupyTerritory(Territory source, Territory destination, int movedTroop) {
+    occupyTerritory(destination, source.getOwner(), movedTroop, source);
+  }
+
+  private void occupyTerritory(Territory destination, Player player, int movedTroop, Territory source) {
+    if (source != null && destination.getOwner() != null) {
+      destination.getOwner().removeTerritory(destination);
+    }
+    destination.setOwner(player);
+    destination.deployTroop(movedTroop);
+    player.addTerritory(destination);
+
+    if (source != null) {
+      source.withdrawTroop(movedTroop);
+      EventBus.emit(new TroopMovementEvent(player, gameState.currentPhase(), source, destination));
+      EventBus.emit(new TerritoryOccupiedEvent(destination, player));
+    } else {
+      EventBus.emit(new TroopMovementEvent(player, gameState.currentPhase(), null, destination));
+    }
+
+    LOG.info(
+        "Player [{}] occupied the territory [{}/{}] and deployed [{} troop], now has [{} troop].",
+        player.getUsername(), destination.getName(), destination.getRegion().getName(), movedTroop, destination.getNumberOfStationedTroops()
     );
 
-    EventBus.emit(new TroopMovementEvent(player, null, null, territory));
+    // Check if occupation resulted in owning the region
+    boolean regionWon = destination.getRegion()
+        .getTerritories()
+        .stream()
+        .allMatch(territory -> Objects.equals(territory.getOwner(), player));
+    if (regionWon) {
+      destination.getRegion().setOwner(player);
+      EventBus.emit(new RegionOccupiedEvent(destination.getRegion(), player));
+    }
+  }
+
+  public List<Territory> getAttackableTerritories(Territory origin, Player player) {
+    return gameMap.getAdjacentTerritories(origin)
+        .stream()
+        .filter(territory -> !Objects.equals(player, territory.getOwner()))
+        .sorted(Comparator.comparingInt(Territory::getNumberOfStationedTroops).reversed())
+        .collect(Collectors.toList());
+  }
+
+  public boolean isAttackable(Territory origin, Territory destination) {
+    return gameMap.isAttackable(origin, destination);
+  }
+
+  public CombatResult performCombat(Territory attacker, Territory defender, int attackingTroops) {
+    if (attackingTroops < 1 || attacker.getNumberOfStationedTroops()-1 < attackingTroops) {
+      LOG.info("Not enough or too few attacking troops, desired {} vs actual {}", attackingTroops, attacker.getNumberOfStationedTroops());
+      return null;
+    }
+    if (!gameMap.isAttackable(attacker, defender)) {
+      LOG.info("Cannot attack {} from {}.", defender.getName(), attacker.getName());
+      return null;
+    }
+
+    int defendingTroop = defender.getNumberOfStationedTroops();
+    DiceRoll.RollResult rollResult = DiceRoll.playRoll(attackingTroops, defendingTroop);
+
+    LOG.info("Attacker [{}] rolled {}.", attacker.getOwner().getUsername(), rollResult.attackerRoll());
+    LOG.info("Defender [{}] rolled {}.", defender.getOwner().getUsername(), rollResult.defenderRoll());
+
+    int attackerLost = 0;
+    int defenderLost = 0;
+    for (int i = 0; i < Math.min(attackingTroops, defendingTroop); i++) {
+      if (rollResult.attackerRoll().get(i) > rollResult.defenderRoll().get(i)) {
+        defenderLost++;
+      } else {
+        attackerLost++;
+      }
+    }
+
+    attacker.withdrawTroop(attackerLost);
+    LOG.info("Player [{}] attacked [{}] and lost [{}] troop(s).", attacker.getOwner().getUsername(), defender.getName(), attackerLost);
+    defender.withdrawTroop(defenderLost);
+    LOG.info("Player [{}] defended [{}] and lost [{}] troop(s).", defender.getOwner().getUsername(), defender.getName(), defenderLost);
+
+    if (defender.getNumberOfStationedTroops() == 0) {
+      occupyTerritory(attacker, defender, attackingTroops - attackerLost);
+      return new CombatResult(attackerLost, defenderLost, CombatResult.Result.OCCUPIED);
+    }
+
+    return new CombatResult(
+        attackerLost,
+        defenderLost,
+        attacker.getNumberOfStationedTroops() == 1 ? CombatResult.Result.ADVANCE : CombatResult.Result.FORFEIT
+    );
   }
 
   private void checkWinningCondition() {

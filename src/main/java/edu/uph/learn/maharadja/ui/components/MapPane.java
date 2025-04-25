@@ -4,6 +4,7 @@ import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
 import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.Territory;
+import edu.uph.learn.maharadja.ui.event.TerritorySelectedEvent;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
@@ -23,6 +24,7 @@ public class MapPane extends ScrollPane {
   public MapPane(GameMap gameMap) {
     super(new Pane(new Group()));
     EventBus.registerListener(TroopMovementEvent.class, this::onTroopMovement);
+    EventBus.registerListener(TerritorySelectedEvent.class, this::onTerritorySelectedEvent);
     this.gameMap = gameMap;
     HBox.setHgrow(this, Priority.ALWAYS);
     setPannable(true);
@@ -63,5 +65,11 @@ public class MapPane extends ScrollPane {
         mapTileGrid.put(point, waterTile);
       }
     }
+  }
+
+  private void onTerritorySelectedEvent(
+      TerritorySelectedEvent territorySelectedEvent
+  ) {
+    // do nothing
   }
 }

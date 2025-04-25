@@ -54,14 +54,15 @@ public class Territory {
   }
 
   public void deployTroop(int count) {
-    numberOfStationedTroops += count;
+    if (count > 0) {
+      numberOfStationedTroops += count;
+    }
   }
 
   public void withdrawTroop(int count) {
-    if (numberOfStationedTroops - count < 1) {
-      return;
+    if (count >= 0) {
+      numberOfStationedTroops -= count;
     }
-    numberOfStationedTroops -= count;
   }
 
   @Override

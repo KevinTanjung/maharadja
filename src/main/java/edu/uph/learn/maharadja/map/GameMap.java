@@ -118,6 +118,10 @@ public class GameMap {
         && adjacencyList.get(origin).contains(destination);
   }
 
+  public Set<Territory> getAdjacentTerritories(Territory origin) {
+    return adjacencyList.get(origin);
+  }
+
   /**
    * <p>
    *   Helper to check if two territories are connected by the same owner.

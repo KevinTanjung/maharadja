@@ -5,7 +5,8 @@ import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.map.Region;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.ui.TileType;
-import edu.uph.learn.maharadja.ui.event.MapTileSelectedEvent;
+import edu.uph.learn.maharadja.ui.event.TerritorySelectedEvent;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Cursor;
 import javafx.scene.control.Tooltip;
 import javafx.scene.shape.Polygon;
@@ -22,7 +23,8 @@ public class MapTile extends Polygon {
   private final TileType tileType;
   private final int q;
   private final int r;
-  //private final Text label;
+
+  private final SimpleBooleanProperty highlighted = new SimpleBooleanProperty();
 
   public MapTile(int q, int r) {
     this(null, null, q, r, TileType.WATER);
@@ -114,7 +116,17 @@ public class MapTile extends Polygon {
       setStrokeWidth(1);
       setCursor(Cursor.DEFAULT);
     });
-    setOnMouseClicked(e -> EventBus.emit(new MapTileSelectedEvent(this)));
+    setOnMouseClicked(e -> {
+      EventBus.emit(new TerritorySelectedEvent(this, territory, null));
+    });
+  }
+
+  public boolean isHighlighted() {
+    return highlighted.get();
+  }
+
+  public SimpleBooleanProperty highlightedProperty() {
+    return highlighted;
   }
 
   @Override

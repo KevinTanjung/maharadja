@@ -73,6 +73,10 @@ public class Player {
     territories.add(territory);
   }
 
+  public void removeTerritory(Territory territory) {
+    territories.remove(territory);
+  }
+
   public boolean isForfeited() {
     return forfeited;
   }

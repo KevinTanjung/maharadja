@@ -5,9 +5,9 @@ import javafx.scene.text.Font;
 public class UI {
   private UI() {}
 
-  public static final double MEDIUM = 16;
   public static final double UNIT = 8;
   public static final double SMALL = UNIT / 2;
+  public static final double MEDIUM = UNIT * 2;
 
   public static final double WIDTH = 1280;
   public static final double HEIGHT = 720;

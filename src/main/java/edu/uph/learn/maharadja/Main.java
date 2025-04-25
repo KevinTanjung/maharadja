@@ -39,7 +39,8 @@ public class Main extends Application {
    */
   @Override
   public void start(Stage primaryStage) {
-    state = GameState.init();
+    GameState.init();
+    state = GameState.get();
     eventBus = EventBus.init();
     window = new GameWindow(primaryStage);
   }

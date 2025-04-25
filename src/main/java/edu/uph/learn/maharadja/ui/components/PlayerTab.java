@@ -67,14 +67,6 @@ public class PlayerTab extends Tab {
     });
   }
 
-  private void onGamePhaseEvent(GamePhaseEvent gamePhaseEvent) {
-    LOG.info("[onGamePhase] [{}] Player {} turn, Phase {}", player.getUsername(), gamePhaseEvent.currentPlayer().getUsername(), gamePhaseEvent.phase());
-
-    if (gamePhaseEvent.phase() == TurnPhase.START) {
-      renderTabTitle(gamePhaseEvent.currentPlayer());
-    }
-  }
-
   public void renderTabTitle(Player currentPlayer) {
     if (Objects.equals(this.player, currentPlayer)) {
       setText("   " + player.getUsername() + "   ");
@@ -91,11 +83,6 @@ public class PlayerTab extends Tab {
     }
   }
 
-  private void onTroopMovementEvent(TroopMovementEvent event) {
-    // TODO: optimize to detect change
-    renderTerritories();
-  }
-
   private void renderTerritories() {
     Platform.runLater(() -> {
       regionPanes.clear();
@@ -107,12 +94,25 @@ public class PlayerTab extends Tab {
       }
       List<FXRegion> sortedPanes = regionPanes.values().stream().sorted().toList();
       accordion.getPanes().setAll(sortedPanes);
-      accordion.setExpandedPane(sortedPanes.getFirst());
+      if (!sortedPanes.isEmpty()) {
+        accordion.setExpandedPane(sortedPanes.getFirst());
+      }
       for (FXRegion region : sortedPanes) {
         Collections.sort(region.territoryList);
         region.setContent(new VBox(region.territoryList.toArray(new FXTerritory[0])));
       }
     });
+  }
+
+  private void onGamePhaseEvent(GamePhaseEvent gamePhaseEvent) {
+    if (gamePhaseEvent.phase() == TurnPhase.START) {
+      renderTabTitle(gamePhaseEvent.currentPlayer());
+    }
+  }
+
+  private void onTroopMovementEvent(TroopMovementEvent event) {
+    // TODO: optimize to detect change
+    renderTerritories();
   }
 
   public static class FXRegion extends TitledPane implements Comparable<FXRegion> {

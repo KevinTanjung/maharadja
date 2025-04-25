@@ -33,11 +33,10 @@ public class GameState {
     private static GameState INSTANCE;
   }
 
-  public static GameState init() {
+  public static void init() {
     if (GameStateHolder.INSTANCE == null) {
       GameStateHolder.INSTANCE = new GameState();
     }
-    return GameStateHolder.INSTANCE;
   }
 
   public static GameState get() {

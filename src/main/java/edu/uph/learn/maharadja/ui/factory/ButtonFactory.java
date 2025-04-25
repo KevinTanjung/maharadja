@@ -11,16 +11,24 @@ public class ButtonFactory {
   private ButtonFactory() {
   }
 
-  public static Button primary(String label, double width) {
+  public static Button create(String label,
+                              double width,
+                              Color text,
+                              Color background) {
     Button button = new Button(label);
+    button.setStyle("-fx-text-fill: " + text.toHex());
     button.setFont(SMALL_FONT);
     button.setMinHeight(HEIGHT_NORMAL);
     button.setPrefHeight(HEIGHT_NORMAL);
     button.setMinWidth(width);
     button.setPrefWidth(width);
-    button.setBackground(Background.fill(Color.IMPERIAL_GOLD.get()));
-    button.setBorder(BorderFactory.primary());
+    button.setBackground(Background.fill(background.get()));
+    button.setBorder(BorderFactory.color(background));
     return button;
+  }
+
+  public static Button primary(String label, double width) {
+    return create(label, width, Color.VOLCANIC_BLACK, Color.IMPERIAL_GOLD);
   }
 
   public static Button square(String label,
