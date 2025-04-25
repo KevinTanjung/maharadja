@@ -4,7 +4,7 @@ import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.common.UI;
 import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.GameEngine;
-import edu.uph.learn.maharadja.game.event.ReinforcementPhaseEvent;
+import edu.uph.learn.maharadja.game.event.DraftPhaseEvent;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.ui.factory.ButtonFactory;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -27,17 +27,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ReinforceTroopForm extends ScrollPane {
-  private static final Logger LOG = LoggerFactory.getLogger(ReinforceTroopForm.class);
+public class DraftTroopForm extends ScrollPane {
+  private static final Logger LOG = LoggerFactory.getLogger(DraftTroopForm.class);
 
   private final GridPane gridPane;
-  private final SimpleIntegerProperty reinforcementPhaseCounter = new SimpleIntegerProperty();
+  private final SimpleIntegerProperty draftedTroop = new SimpleIntegerProperty();
   private final Map<Territory, SimpleIntegerProperty> troopAssignment = new HashMap<>();
   private final Button submitButton;
 
-  public ReinforceTroopForm() {
+  public DraftTroopForm() {
     super();
-    EventBus.registerListener(ReinforcementPhaseEvent.class, this::onReinforcementPhaseEvent);
+    EventBus.registerListener(DraftPhaseEvent.class, this::onDraftPhaseEvent);
 
     gridPane = new GridPane();
     gridPane.setVgap(UI.UNIT);
@@ -56,7 +56,7 @@ public class ReinforceTroopForm extends ScrollPane {
 
     submitButton = ButtonFactory.primary("DEPLOY", UI.TAB_WIDTH - UI.UNIT);
     submitButton.setOnAction(actionEvent -> {
-      GameEngine.get().reinforceTroop(
+      GameEngine.get().draftTroop(
           troopAssignment.entrySet()
               .stream()
               .map(entry -> Map.entry(entry.getKey(), entry.getValue().get()))
@@ -65,19 +65,19 @@ public class ReinforceTroopForm extends ScrollPane {
     });
   }
 
-  void onReinforcementPhaseEvent(ReinforcementPhaseEvent event) {
-    LOG.info("[onReinforcementPhaseEvent] Player = {}, Number of Troops = {}", event.player().getUsername(), event.numOfTroops());
+  void onDraftPhaseEvent(DraftPhaseEvent event) {
+    LOG.info("[onDraftPhaseEvent] Player = {}, Number of Troops = {}", event.player().getUsername(), event.numOfTroops());
     resetForm();
 
     // Assignable Troop
     Label label = new Label("Deployable Troops:");
     label.setAlignment(Pos.CENTER_LEFT);
     gridPane.add(label, 0, 0, 2, 1);
-    submitButton.disableProperty().bind(reinforcementPhaseCounter.isEqualTo(event.numOfTroops()).not());
+    submitButton.disableProperty().bind(draftedTroop.isEqualTo(event.numOfTroops()).not());
 
     Label numOfTroop = new Label();
     numOfTroop.textProperty().bind(
-        reinforcementPhaseCounter.subtract(event.numOfTroops())
+        draftedTroop.subtract(event.numOfTroops())
             .multiply(-1)
             .asString()
     );
@@ -111,10 +111,10 @@ public class ReinforceTroopForm extends ScrollPane {
       Button decrementButton = renderButton("-");
       decrementButton.disableProperty().bind(
           currentTroopCount.lessThanOrEqualTo(0)
-              .or(reinforcementPhaseCounter.lessThanOrEqualTo(0))
+              .or(draftedTroop.lessThanOrEqualTo(0))
       );
       decrementButton.setOnAction(actionEvent -> {
-        reinforcementPhaseCounter.set(reinforcementPhaseCounter.get() - 1);
+        draftedTroop.set(draftedTroop.get() - 1);
         troopAssignment.get(territory).set(troopAssignment.get(territory).get() - 1);
       });
 
@@ -135,9 +135,9 @@ public class ReinforceTroopForm extends ScrollPane {
 
       // Increment Button
       Button incrementButton = renderButton("+");
-      incrementButton.disableProperty().bind(reinforcementPhaseCounter.greaterThanOrEqualTo(event.numOfTroops()));
+      incrementButton.disableProperty().bind(draftedTroop.greaterThanOrEqualTo(event.numOfTroops()));
       incrementButton.setOnAction(mouseEvent -> {
-        reinforcementPhaseCounter.set(reinforcementPhaseCounter.get() + 1);
+        draftedTroop.set(draftedTroop.get() + 1);
         currentTroopCount.set(currentTroopCount.get() + 1);
       });
 
@@ -155,7 +155,7 @@ public class ReinforceTroopForm extends ScrollPane {
 
   private void resetForm() {
     gridPane.getChildren().clear();
-    reinforcementPhaseCounter.set(0);
+    draftedTroop.set(0);
     troopAssignment.clear();
   }
 

@@ -6,7 +6,7 @@ import edu.uph.learn.maharadja.game.event.AttackPhaseEvent;
 import edu.uph.learn.maharadja.game.event.FortifyPhaseEvent;
 import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
 import edu.uph.learn.maharadja.game.event.PlayerForfeitEvent;
-import edu.uph.learn.maharadja.game.event.ReinforcementPhaseEvent;
+import edu.uph.learn.maharadja.game.event.DraftPhaseEvent;
 import edu.uph.learn.maharadja.game.event.SkipPhaseEvent;
 import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
 import edu.uph.learn.maharadja.map.GameMap;
@@ -45,8 +45,8 @@ public class GameEngine {
     nextPhase();
   }
 
-  public void reinforceTroop(Map<Territory, Integer> troopReinforcement) {
-    for (Map.Entry<Territory, Integer> entry : troopReinforcement.entrySet()) {
+  public void draftTroop(Map<Territory, Integer> draftTroopMapping) {
+    for (Map.Entry<Territory, Integer> entry : draftTroopMapping.entrySet()) {
       entry.getKey().deployTroop(entry.getValue());
       EventBus.emit(new TroopMovementEvent(
           GameState.get().currentTurn(),
@@ -136,8 +136,8 @@ public class GameEngine {
     }
 
     TurnPhase nextPhase = switch (gameState.currentPhase()) {
-      case START -> TurnPhase.REINFORCEMENT;
-      case REINFORCEMENT -> TurnPhase.ATTACK;
+      case START -> TurnPhase.DRAFT;
+      case DRAFT -> TurnPhase.ATTACK;
       case ATTACK -> TurnPhase.FORTIFY;
       case FORTIFY -> TurnPhase.START;
     };
@@ -151,21 +151,21 @@ public class GameEngine {
         checkWinningCondition();
         nextTurn();
       }
-      case REINFORCEMENT -> reinforceTroops(currentPlayer);
-      case ATTACK -> attackTroops(currentPlayer);
-      case FORTIFY -> fortifyTroops(currentPlayer);
+      case DRAFT -> draftTroops(currentPlayer);
+      case ATTACK -> attackTerritories(currentPlayer);
+      case FORTIFY -> fortifyTerritories(currentPlayer);
     }
   }
 
-  private void reinforceTroops(Player currentPlayer) {
+  private void draftTroops(Player currentPlayer) {
     int numOfTroops = Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(),  3));
-    EventBus.emit(new ReinforcementPhaseEvent(currentPlayer, numOfTroops));
+    EventBus.emit(new DraftPhaseEvent(currentPlayer, numOfTroops));
     if (currentPlayer.isComputer()) {
-      // TODO: aiEngine.reinforceTroops(currentPlayer, numOfTroops);
+      // TODO: aiEngine.draftTroops(currentPlayer, numOfTroops);
     }
   }
 
-  private void attackTroops(Player currentPlayer) {
+  private void attackTerritories(Player currentPlayer) {
     List<Territory> deployableTerritories = TerritoryUtil.getDeployableTerritories(currentPlayer);
     if (deployableTerritories.isEmpty()) {
       EventBus.emit(new SkipPhaseEvent(currentPlayer, NO_DEPLOYABLE_TROOP));
@@ -174,11 +174,11 @@ public class GameEngine {
     }
     EventBus.emit(new AttackPhaseEvent(currentPlayer, deployableTerritories));
     if (currentPlayer.isComputer()) {
-      // TODO: aiEngine.attackTroops()
+      // TODO: aiEngine.attackTerritories()
     }
   }
 
-  private void fortifyTroops(Player currentPlayer) {
+  private void fortifyTerritories(Player currentPlayer) {
     List<Territory> deployableTerritories = TerritoryUtil.getDeployableTerritories(currentPlayer);
     if (deployableTerritories.isEmpty()) {
       EventBus.emit(new SkipPhaseEvent(currentPlayer, NO_DEPLOYABLE_TROOP));

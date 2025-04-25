@@ -25,7 +25,7 @@ public class TestGameEngine {
     state.start();
 
     GameEngine engine = new GameEngine(GameMapLoader.load(MapType.CLASSIC), state);
-    assertEquals(TurnPhase.REINFORCEMENT, state.currentPhase());
+    assertEquals(TurnPhase.DRAFT, state.currentPhase());
     assertEquals("Ken Dedes", state.currentTurn().getUsername());
     assertFalse(state.currentTurn().isComputer());
     engine.nextPhase();
@@ -43,7 +43,7 @@ public class TestGameEngine {
     assertEquals("Ken Arok", state.currentTurn().getUsername());
     assertFalse(state.currentTurn().isComputer());
     engine.nextPhase();
-    assertEquals(TurnPhase.REINFORCEMENT, state.currentPhase());
+    assertEquals(TurnPhase.DRAFT, state.currentPhase());
     assertEquals("Ken Arok", state.currentTurn().getUsername());
     assertFalse(state.currentTurn().isComputer());
     engine.nextPhase();
