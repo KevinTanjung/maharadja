@@ -305,7 +305,9 @@ public class GameEngine {
     LOG.info("Player [{}] defended [{}] and lost [{}] troop(s).", defender.getOwner().getUsername(), defender.getName(), defenderLost);
 
     if (defender.getNumberOfStationedTroops() == 0) {
+      Player defendingPlayer = defender.getOwner();
       occupyTerritory(attacker, defender, attackingTroops - attackerLost);
+      checkLosingCondition(defendingPlayer);
       return new CombatResult(attackerLost, defenderLost, CombatResult.Result.OCCUPIED);
     }
 
