@@ -12,6 +12,7 @@ import edu.uph.learn.maharadja.game.event.SkipPhaseEvent;
 import edu.uph.learn.maharadja.game.event.TerritoryOccupiedEvent;
 import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
 import edu.uph.learn.maharadja.map.GameMap;
+import edu.uph.learn.maharadja.map.Region;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.utils.DiceRoll;
 import edu.uph.learn.maharadja.utils.TerritoryUtil;
@@ -48,19 +49,6 @@ public class GameEngine {
     this.gameState = gameState;
     gameState.setGameMap(gameMap);
     initialDistribution();
-    nextPhase();
-  }
-
-  public void draftTroop(Map<Territory, Integer> draftTroopMapping) {
-    for (Map.Entry<Territory, Integer> entry : draftTroopMapping.entrySet()) {
-      entry.getKey().deployTroop(entry.getValue());
-      EventBus.emit(new TroopMovementEvent(
-          gameState.currentTurn(),
-          gameState.currentPhase(),
-          null,
-          entry.getKey()
-      ));
-    }
     nextPhase();
   }
 
@@ -156,6 +144,7 @@ public class GameEngine {
         checkLosingCondition(currentPlayer);
         checkWinningCondition();
         nextTurn();
+        nextPhase();
       }
       case DRAFT -> prepareTroopsDraft(currentPlayer);
       case ATTACK -> prepareTerritoryAttack(currentPlayer);
@@ -164,11 +153,30 @@ public class GameEngine {
   }
 
   private void prepareTroopsDraft(Player currentPlayer) {
-    int numOfTroops = Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(),  3));
+    int numOfTroops = 0;
+    // Troops based on owned territories
+    numOfTroops += Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(), 3));
+    // Troops based on owned region
+    for (Region region : gameMap.getAllRegions()) {
+      if (Objects.equals(currentPlayer, region.getOwner())) {
+        numOfTroops += region.getBonusTroops();
+      }
+    }
+    // TODO: Troops based on resource
+
     EventBus.emit(new DraftPhaseEvent(currentPlayer, numOfTroops));
     if (currentPlayer.isComputer()) {
       // TODO: aiEngine.draftTroops(currentPlayer, numOfTroops);
     }
+  }
+
+  public void draftTroop(Map<Territory, Integer> draftTroopMapping) {
+    for (Map.Entry<Territory, Integer> entry : draftTroopMapping.entrySet()) {
+      if (entry.getValue() > 0) continue;
+      entry.getKey().deployTroop(entry.getValue());
+      EventBus.emit(new TroopMovementEvent(gameState.currentTurn(), TurnPhase.DRAFT, null, entry.getKey()));
+    }
+    nextPhase();
   }
 
   public void prepareTerritoryAttack(Player currentPlayer) {
@@ -306,6 +314,30 @@ public class GameEngine {
         defenderLost,
         attacker.getNumberOfStationedTroops() == 1 ? CombatResult.Result.ADVANCE : CombatResult.Result.FORFEIT
     );
+  }
+
+  public List<Territory> fortifyTerritory(Territory from, Territory to, int numOfTroops) {
+    List<Territory> shortestDeploymentPath = gameMap.getShortestDeploymentPath(from, to);
+    if (shortestDeploymentPath.isEmpty()) {
+      return shortestDeploymentPath;
+    }
+    from.withdrawTroop(numOfTroops);
+    to.deployTroop(numOfTroops);
+    EventBus.emit(new TroopMovementEvent(gameState.currentTurn(), TurnPhase.FORTIFY, from, to));
+    nextPhase();
+    return shortestDeploymentPath;
+  }
+
+  public List<Territory> getFortifiableTerritories(Territory origin) {
+    List<Territory> fortifiableTerritories = new ArrayList<>();
+    for (Territory ownedTerritory : origin.getOwner().getTerritories()) {
+      if (origin.equals(ownedTerritory)) continue;
+      if (!gameMap.getShortestDeploymentPath(origin, ownedTerritory).isEmpty()) {
+        fortifiableTerritories.add(ownedTerritory);
+      }
+    }
+    fortifiableTerritories.sort(Comparator.comparingInt(Territory::getNumberOfStationedTroops));
+    return fortifiableTerritories;
   }
 
   private void checkWinningCondition() {

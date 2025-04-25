@@ -29,11 +29,15 @@ public class GameWindow {
     openLobby();
 
     // Debugging
-    registerPlayer("GajahMada", true);
-    Player currentPlayer = GameState.get().currentTurn();
-    Territory territory = currentPlayer.getTerritories().iterator().next();
-    int numOfTroops = Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(),  3));
-    GameEngine.get().draftTroop(Map.of(territory, numOfTroops));
+    // -- skip lobby
+    //registerPlayer("GajahMada", true);
+    // -- auto draft
+    //Player currentPlayer = GameState.get().currentTurn();
+    //Territory territory = currentPlayer.getTerritories().iterator().next();
+    //int numOfTroops = Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(),  3));
+    //GameEngine.get().draftTroop(Map.of(territory, numOfTroops));
+    // -- skip attack
+    //GameEngine.get().nextPhase();
   }
 
   public void openLobby() {
