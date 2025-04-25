@@ -24,22 +24,19 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
-import javafx.util.StringConverter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
-public class AttackTerritoryForm extends ScrollPane {
+public class AttackTerritoryForm extends BaseActionForm {
   private final Button submitButton;
   private final Button endButton;
   private final ObjectProperty<Territory> sourceTerritory = new SimpleObjectProperty<>();
@@ -54,11 +51,6 @@ public class AttackTerritoryForm extends ScrollPane {
     super();
     EventBus.registerListener(AttackPhaseEvent.class, this::onAttackPhaseEvent);
     EventBus.registerListener(TerritorySelectedEvent.class, this::onTerritorySelectedEvent);
-
-    setBackground(Background.fill(Color.IVORY_WHITE.get()));
-    setFitToWidth(true);
-    setFitToHeight(true);
-    setHbarPolicy(ScrollBarPolicy.NEVER);
 
     double buttonWidth = (UI.TAB_WIDTH / 2) - UI.UNIT;
     submitButton = ButtonFactory.create(
@@ -224,19 +216,5 @@ public class AttackTerritoryForm extends ScrollPane {
 
   public Button getEndButton() {
     return endButton;
-  }
-
-  public static class TerritoryStringConverter extends StringConverter<Territory> {
-    @Override
-    public String toString(Territory territory) {
-      return Optional.ofNullable(territory)
-          .map(t -> String.format("(%02d) %s, %s", t.getNumberOfStationedTroops(), t.getName(), t.getRegion().getName()))
-          .orElse("-");
-    }
-
-    @Override
-    public Territory fromString(String s) {
-      return null;
-    }
   }
 }

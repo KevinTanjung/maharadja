@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class DraftTroopForm extends ScrollPane {
+public class DraftTroopForm extends BaseActionForm {
   private static final Logger LOG = LoggerFactory.getLogger(DraftTroopForm.class);
 
   private final GridPane gridPane;
@@ -49,10 +49,6 @@ public class DraftTroopForm extends ScrollPane {
     gridPane.setPrefWidth(this.getPrefWidth());
     gridPane.setMaxWidth(this.getMaxWidth());
     setContent(gridPane);
-
-    setFitToWidth(true);
-    setFitToHeight(true);
-    setHbarPolicy(ScrollBarPolicy.NEVER);
 
     submitButton = ButtonFactory.primary("DEPLOY", UI.TAB_WIDTH - UI.UNIT);
     submitButton.setOnAction(actionEvent -> {

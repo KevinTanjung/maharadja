@@ -113,4 +113,19 @@ public class ActionPane extends BorderPane {
     hbox.getChildren().addAll(attackTerritoryForm.getSubmitButton(), attackTerritoryForm.getEndButton());
     setBottom(hbox);
   }
+
+  private void renderFortifyAction() {
+    setTop(LabelFactory.create(
+        TextResource.ATTACK_TITLE,
+        Color.SUNSET_RED,
+        Color.IVORY_WHITE,
+        UI.TAB_WIDTH - UI.UNIT
+    ));
+    setCenter(attackTerritoryForm);
+    HBox hbox = new HBox(UI.UNIT);
+    HBox.setHgrow(attackTerritoryForm.getSubmitButton(), Priority.ALWAYS);
+    HBox.setHgrow(attackTerritoryForm.getEndButton(), Priority.ALWAYS);
+    hbox.getChildren().addAll(attackTerritoryForm.getSubmitButton(), attackTerritoryForm.getEndButton());
+    setBottom(hbox);
+  }
 }
