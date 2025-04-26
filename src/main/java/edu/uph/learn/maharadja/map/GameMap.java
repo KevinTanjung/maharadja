@@ -67,7 +67,7 @@ public class GameMap {
       return;
     }
 
-    territoryMap.put(new Point2D(territory.getQ(), territory.getR()), territory);
+    territoryMap.put(territory.getPoint(), territory);
     territoryList.add(territory);
     adjacencyList.putIfAbsent(territory, new HashSet<>());
 

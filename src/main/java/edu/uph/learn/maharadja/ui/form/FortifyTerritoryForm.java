@@ -2,12 +2,14 @@ package edu.uph.learn.maharadja.ui.form;
 
 import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.common.UI;
+import edu.uph.learn.maharadja.event.Event;
 import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.GameEngine;
 import edu.uph.learn.maharadja.game.GameState;
 import edu.uph.learn.maharadja.game.event.FortifyPhaseEvent;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.ui.TextResource;
+import edu.uph.learn.maharadja.ui.event.TerritoryHighlightedEvent;
 import edu.uph.learn.maharadja.ui.event.TerritorySelectedEvent;
 import edu.uph.learn.maharadja.ui.factory.ButtonFactory;
 import javafx.beans.binding.Bindings;
@@ -32,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 public class FortifyTerritoryForm extends BaseActionForm {
   private static final Logger LOG = LoggerFactory.getLogger(FortifyTerritoryForm.class);
@@ -91,7 +94,7 @@ public class FortifyTerritoryForm extends BaseActionForm {
       List<Territory> fortifiableTerritories = GameEngine.get().getFortifiableTerritories(selectedItem);
       numOfTroops.setValue(1);
       targetTerritoryOptions.setAll(fortifiableTerritories.toArray(Territory[]::new));
-      // TODO: highlight fortifiable territories
+      EventBus.emit(new TerritoryHighlightedEvent(Set.copyOf(fortifiableTerritories)));
     });
     HBox.setHgrow(sourceTerritoryChoiceBox, Priority.ALWAYS);
     vBox.getChildren().addAll(sourceTerritoryLabel, sourceTerritoryChoiceBox);
@@ -109,7 +112,6 @@ public class FortifyTerritoryForm extends BaseActionForm {
         return;
       }
       EventBus.emit(new TerritorySelectedEvent(this, selectedItem, TerritorySelectedEvent.SelectionType.TO));
-      // TODO: highlight attackable territories
     });
     targetTerritoryChoiceBox.disableProperty().bind(sourceTerritory.isNull());
     HBox.setHgrow(targetTerritoryChoiceBox, Priority.ALWAYS);

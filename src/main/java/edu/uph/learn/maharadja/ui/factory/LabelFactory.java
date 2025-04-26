@@ -23,27 +23,27 @@ public class LabelFactory {
   }
 
   public static Label troopLabel() {
+    double size = UI.LARGE;
     Label label = new Label();
     label.setStyle(
         "-fx-background-color: " + Color.VOLCANIC_BLACK.toHex() + "; "
-            + "-fx-background-radius: " + ((int) UI.UNIT) + "px;"
-            + "-fx-border-color: " + Color.IMPERIAL_GOLD.toHex() + "; "
-            + "-fx-border-radius: " + ((int) UI.UNIT) + "px;"
+            + "-fx-background-radius: " + ((int) size) + "px;"
+            + "-fx-border-color: " + Color.VOLCANIC_BLACK.toHex() + "; "
+            + "-fx-border-radius: " + ((int) size) + "px;"
             + "-fx-font-weight: bold;"
             + "-fx-text-fill: " + Color.IVORY_WHITE.toHex() + ";"
             + "-fx-alignment: center;"
     );
     label.setFont(UI.SMALL_FONT);
-    label.setMinWidth(UI.MEDIUM);
-    label.setPrefWidth(UI.MEDIUM);
-    label.setMaxWidth(UI.MEDIUM);
-    label.setMinHeight(UI.MEDIUM);
-    label.setPrefHeight(UI.MEDIUM);
-    label.setMaxHeight(UI.MEDIUM);
-    label.setLayoutX(UI.UNIT * -1);
-    label.setLayoutY(UI.UNIT * -1);
+    label.setMinWidth(size);
+    label.setPrefWidth(size);
+    label.setMaxWidth(size);
+    label.setMinHeight(size);
+    label.setPrefHeight(size);
+    label.setMaxHeight(size);
+    label.setLayoutX(size * -1 / 2);
+    label.setLayoutY(size * -1 / 2);
     label.setMouseTransparent(true);
-    label.setVisible(false);
     return label;
   }
 

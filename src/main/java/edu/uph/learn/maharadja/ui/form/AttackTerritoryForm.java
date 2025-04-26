@@ -11,6 +11,7 @@ import edu.uph.learn.maharadja.game.event.AttackPhaseEvent;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.ui.TextResource;
 import edu.uph.learn.maharadja.ui.event.CombatResultEvent;
+import edu.uph.learn.maharadja.ui.event.TerritoryHighlightedEvent;
 import edu.uph.learn.maharadja.ui.event.TerritorySelectedEvent;
 import edu.uph.learn.maharadja.ui.event.TerritorySelectedEvent.SelectionType;
 import edu.uph.learn.maharadja.ui.factory.ButtonFactory;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class AttackTerritoryForm extends BaseActionForm {
   private final Button submitButton;
@@ -100,7 +102,7 @@ public class AttackTerritoryForm extends BaseActionForm {
       );
       numOfTroops.setValue(selectedItem.getNumberOfStationedTroops() - 1);
       targetTerritoryOptions.setAll(attackableTerritories.toArray(Territory[]::new));
-      // TODO: highlight attackable territories
+      EventBus.emit(new TerritoryHighlightedEvent(Set.copyOf(attackableTerritories)));
     });
     HBox.setHgrow(sourceTerritoryChoiceBox, Priority.ALWAYS);
     vBox.getChildren().addAll(sourceTerritoryLabel, sourceTerritoryChoiceBox);
@@ -118,7 +120,6 @@ public class AttackTerritoryForm extends BaseActionForm {
         return;
       }
       EventBus.emit(new TerritorySelectedEvent(this, selectedItem, SelectionType.TO));
-      // TODO: highlight attackable territories
     });
     targetTerritoryChoiceBox.disableProperty().bind(sourceTerritory.isNull());
     HBox.setHgrow(targetTerritoryChoiceBox, Priority.ALWAYS);

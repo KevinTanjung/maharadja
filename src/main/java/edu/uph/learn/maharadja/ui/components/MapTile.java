@@ -3,7 +3,6 @@ package edu.uph.learn.maharadja.ui.components;
 import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.Player;
-import edu.uph.learn.maharadja.map.Region;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.ui.TileType;
 import edu.uph.learn.maharadja.ui.event.TerritorySelectedEvent;
@@ -29,14 +28,14 @@ import static edu.uph.learn.maharadja.common.UI.HEX_SIZE;
  * Inspired by <a href="https://www.redblobgames.com/grids/hexagons-v1">source</a>
  */
 public class MapTile extends Group {
-  private final ObjectProperty<Player> owner = new SimpleObjectProperty<>();
-  private final SimpleIntegerProperty numberOfTroops = new SimpleIntegerProperty();
-  private final SimpleBooleanProperty highlighted = new SimpleBooleanProperty();
+  private final ObjectProperty<Player> owner = new SimpleObjectProperty<>(null);
+  private final SimpleIntegerProperty numberOfTroops = new SimpleIntegerProperty(1);
+  private final SimpleBooleanProperty selected = new SimpleBooleanProperty(false);
+  private final SimpleBooleanProperty highlighted = new SimpleBooleanProperty(false);
   private final Territory territory;
   private final int q;
   private final int r;
   private final TileType tileType;
-  private final Label label;
   private final Polygon hex;
 
   public MapTile(int q, int r) {
@@ -66,12 +65,10 @@ public class MapTile extends Group {
     setTranslateX(x);
     setTranslateY(y);
 
-    label = LabelFactory.troopLabel();
-    getChildren().addAll(hex, label);
-
     if (territory == null) {
       hex.setStroke(UIUtil.alpha(Color.SKY_BLUE, 0.3));
       hex.setFill(Color.ALICE_BLUE.get());
+      getChildren().add(hex);
       return;
     }
 
@@ -79,15 +76,17 @@ public class MapTile extends Group {
     hex.fillProperty().bind(Bindings.createObjectBinding(
         () -> Optional.ofNullable(owner.get())
             .map(Player::getColor)
-            .map(color -> UIUtil.alpha(color, highlighted.get() ? 1.0 : 0.5))
+            .map(color -> UIUtil.alpha(color, selected.get() ? 1.0 : (highlighted.get() ? 0.6 : 0.3)))
             .orElseGet(Color.IVORY_WHITE::get),
         owner,
-        highlighted
+        highlighted,
+        selected
     ));
     setMouseEvent();
     renderToolTip();
+    Label label = LabelFactory.troopLabel();
     label.textProperty().bind(numberOfTroops.asString());
-    label.setVisible(true);
+    getChildren().addAll(hex, label);
   }
 
   private void renderToolTip() {
@@ -118,9 +117,11 @@ public class MapTile extends Group {
       hex.setStrokeWidth(1);
       setCursor(Cursor.DEFAULT);
     });
-    setOnMouseClicked(e -> {
-      EventBus.emit(new TerritorySelectedEvent(this, territory, null));
-    });
+    setOnMouseClicked(e -> EventBus.emit(new TerritorySelectedEvent(this, territory, null)));
+  }
+
+  public SimpleBooleanProperty selectedProperty() {
+    return selected;
   }
 
   public SimpleBooleanProperty highlightedProperty() {
@@ -133,6 +134,10 @@ public class MapTile extends Group {
 
   public SimpleIntegerProperty numberOfTroopsProperty() {
     return numberOfTroops;
+  }
+
+  public Territory getTerritory() {
+    return territory;
   }
 
   @Override

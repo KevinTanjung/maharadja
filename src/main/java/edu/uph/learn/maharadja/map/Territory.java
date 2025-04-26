@@ -1,6 +1,7 @@
 package edu.uph.learn.maharadja.map;
 
 import edu.uph.learn.maharadja.game.Player;
+import javafx.geometry.Point2D;
 
 import java.util.Objects;
 
@@ -35,6 +36,10 @@ public class Territory {
 
   public Player getOwner() {
     return owner;
+  }
+
+  public Point2D getPoint() {
+    return new Point2D(q, r);
   }
 
   public void setOwner(Player owner) {
