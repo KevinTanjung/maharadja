@@ -105,9 +105,11 @@ public class GameEngine {
         troopCount++;
 
         LOG.info(
-            "[Player {}] deployed [1 troop] to territory [{}/{}], now has [{} troop].",
+            "Player [{}] deployed [1] troop to territory [{}/{}], now has [{}] troop(s).",
             player.getUsername(), territory.getName(), territory.getRegion().getName(), territory.getNumberOfStationedTroops()
         );
+
+        EventBus.emit(new TroopMovementEvent(player, gameState.currentPhase(), null, territory));
       }
     }
     //endregion
@@ -172,8 +174,16 @@ public class GameEngine {
 
   public void draftTroop(Map<Territory, Integer> draftTroopMapping) {
     for (Map.Entry<Territory, Integer> entry : draftTroopMapping.entrySet()) {
-      if (entry.getValue() > 0) continue;
+      Territory territory = entry.getKey();
+      if (entry.getValue() == 0) continue;
       entry.getKey().deployTroop(entry.getValue());
+      LOG.info("Player [{}] drafted [{}] troop(s) to territory [{}/{}], now has [{}] troop(s)",
+          territory.getOwner().getUsername(),
+          entry.getValue(),
+          territory.getName(),
+          territory.getRegion().getName(),
+          territory.getNumberOfStationedTroops()
+      );
       EventBus.emit(new TroopMovementEvent(gameState.currentTurn(), TurnPhase.DRAFT, null, entry.getKey()));
     }
     nextPhase();

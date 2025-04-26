@@ -1,9 +1,11 @@
 package edu.uph.learn.maharadja.ui.components;
 
 import edu.uph.learn.maharadja.event.EventBus;
+import edu.uph.learn.maharadja.game.event.TerritoryOccupiedEvent;
 import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
 import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.Territory;
+import edu.uph.learn.maharadja.ui.event.CombatResultEvent;
 import edu.uph.learn.maharadja.ui.event.TerritorySelectedEvent;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
@@ -24,6 +26,8 @@ public class MapPane extends ScrollPane {
   public MapPane(GameMap gameMap) {
     super(new Pane(new Group()));
     EventBus.registerListener(TroopMovementEvent.class, this::onTroopMovement);
+    EventBus.registerListener(CombatResultEvent.class, this::onCombatResultEvent);
+    EventBus.registerListener(TerritoryOccupiedEvent.class, this::onTerritoryOccupiedEvent);
     EventBus.registerListener(TerritorySelectedEvent.class, this::onTerritorySelectedEvent);
     this.gameMap = gameMap;
     HBox.setHgrow(this, Priority.ALWAYS);
@@ -33,16 +37,38 @@ public class MapPane extends ScrollPane {
     populateMapTile(hexGroup, gameMap);
   }
 
-  private void onTroopMovement(TroopMovementEvent troopMovementEvent) {
-    Optional.ofNullable(troopMovementEvent.territoryFrom())
-        .map(territory -> new Point2D(territory.getQ(), territory.getR()))
-        .map(mapTileGrid::get)
-        .ifPresent(MapTile::render);
+  private void onCombatResultEvent(CombatResultEvent combatResultEvent) {
+    if (combatResultEvent.result().attackerLost() > 0) {
+      updateTileTerritory(combatResultEvent.attacker());
+    }
+    if (combatResultEvent.result().defenderLost() > 0) {
+      updateTileTerritory(combatResultEvent.defender());
+    }
+  }
 
-    Optional.ofNullable(troopMovementEvent.territoryTo())
-        .map(territory -> new Point2D(territory.getQ(), territory.getR()))
+  private void onTroopMovement(TroopMovementEvent troopMovementEvent) {
+    updateTileTerritory(troopMovementEvent.territoryFrom());
+    updateTileTerritory(troopMovementEvent.territoryTo());
+  }
+
+  private void onTerritoryOccupiedEvent(TerritoryOccupiedEvent territoryOccupiedEvent) {
+    Point2D point2D = new Point2D(
+        territoryOccupiedEvent.territory().getQ(),
+        territoryOccupiedEvent.territory().getR()
+    );
+    Optional.ofNullable(mapTileGrid.get(point2D))
+        .map(MapTile::ownerProperty)
+        .ifPresent(prop -> prop.set(territoryOccupiedEvent.player()));
+  }
+
+  private void updateTileTerritory(Territory territory) {
+    Optional.ofNullable(territory)
+        .map(t -> new Point2D(t.getQ(), t.getR()))
         .map(mapTileGrid::get)
-        .ifPresent(MapTile::render);
+        .ifPresent(mapTile -> {
+          mapTile.numberOfTroopsProperty().set(territory.getNumberOfStationedTroops());
+          mapTile.ownerProperty().set(territory.getOwner());
+        });
   }
 
   private void populateMapTile(Group hexGroup, GameMap gameMap) {

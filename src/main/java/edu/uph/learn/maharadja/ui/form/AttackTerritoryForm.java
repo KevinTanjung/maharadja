@@ -64,7 +64,7 @@ public class AttackTerritoryForm extends BaseActionForm {
       Territory target = targetTerritory.get();
       CombatResult result = GameEngine.get().performCombat(source, target, numOfTroops.get());
       // TODO: Display Result
-      EventBus.emit(new CombatResultEvent(result));
+      EventBus.emit(new CombatResultEvent(source, target, result));
       GameEngine.get().prepareTerritoryAttack(GameState.get().currentTurn());
     });
     endButton = ButtonFactory.create(

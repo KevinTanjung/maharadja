@@ -137,7 +137,7 @@ public class GameMap {
       return List.of();
     }
     // Ensure that the origin and destination are owned by the same person.
-    // If it isn't then, there's no path to the destination.
+    // If it isn't then, there's no path to the territory.
     if (!Objects.equals(origin.getOwner(), destination.getOwner())) {
       return List.of();
     }

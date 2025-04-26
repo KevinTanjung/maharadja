@@ -30,7 +30,7 @@ public class GameWindow {
 
     // Debugging
     // -- skip lobby
-    //registerPlayer("GajahMada", true);
+    registerPlayer("GajahMada", true);
     // -- auto draft
     //Player currentPlayer = GameState.get().currentTurn();
     //Territory territory = currentPlayer.getTerritories().iterator().next();
