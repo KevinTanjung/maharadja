@@ -1,14 +1,17 @@
 package edu.uph.learn.maharadja.ui.factory;
 
 import edu.uph.learn.maharadja.common.Color;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Background;
+import javafx.scene.paint.Paint;
 
 import static edu.uph.learn.maharadja.common.Constant.HEIGHT_NORMAL;
 import static edu.uph.learn.maharadja.common.UI.SMALL_FONT;
 
 public class ButtonFactory {
-  private ButtonFactory() {
+  public static Button primary(String label, double width) {
+    return create(label, width, Color.VOLCANIC_BLACK, Color.IMPERIAL_GOLD);
   }
 
   public static Button create(String label,
@@ -24,11 +27,8 @@ public class ButtonFactory {
     button.setPrefWidth(width);
     button.setBackground(Background.fill(background.get()));
     button.setBorder(BorderFactory.color(background));
+    addHoverEffect(button);
     return button;
-  }
-
-  public static Button primary(String label, double width) {
-    return create(label, width, Color.VOLCANIC_BLACK, Color.IMPERIAL_GOLD);
   }
 
   public static Button square(String label,
@@ -46,6 +46,27 @@ public class ButtonFactory {
     button.setMaxHeight(width);
     button.setBackground(Background.fill(background.get()));
     button.setBorder(BorderFactory.color(background));
+    addHoverEffect(button);
     return button;
+  }
+
+  private static void addHoverEffect(Button button) {
+    javafx.scene.paint.Color color = (javafx.scene.paint.Color) button.getBackground()
+        .getFills()
+        .getFirst()
+        .getFill();
+    button.setOnMouseEntered(e -> {
+      if (!button.isDisabled()) {
+        button.setCursor(Cursor.HAND);
+        button.setBackground(Background.fill(color.darker()));
+      }
+    });
+    button.setOnMouseExited(e -> {
+      button.setCursor(Cursor.DEFAULT);
+      button.setBackground(Background.fill(color));
+    });
+  }
+
+  private ButtonFactory() {
   }
 }

@@ -1,6 +1,9 @@
 package edu.uph.learn.maharadja.ui.form;
 
 import edu.uph.learn.maharadja.common.Color;
+import edu.uph.learn.maharadja.common.UI;
+import edu.uph.learn.maharadja.ui.factory.ButtonFactory;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Background;
 
@@ -11,5 +14,9 @@ public abstract class BaseActionForm extends ScrollPane {
     setFitToWidth(true);
     setFitToHeight(true);
     setHbarPolicy(ScrollBarPolicy.NEVER);
+  }
+
+  protected Button renderButton(String label) {
+    return ButtonFactory.square(label, UI.UNIT * 3, Color.VOLCANIC_BLACK, Color.SLATE_GRAY);
   }
 }

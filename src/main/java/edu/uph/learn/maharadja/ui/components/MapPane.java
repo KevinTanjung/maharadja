@@ -1,25 +1,36 @@
 package edu.uph.learn.maharadja.ui.components;
 
 import edu.uph.learn.maharadja.event.EventBus;
-import edu.uph.learn.maharadja.game.GameState;
-import edu.uph.learn.maharadja.game.TurnPhase;
 import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
 import edu.uph.learn.maharadja.game.event.TerritoryOccupiedEvent;
 import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
 import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.ui.event.CombatResultEvent;
-import edu.uph.learn.maharadja.ui.event.TerritoryHighlightedEvent;
-import edu.uph.learn.maharadja.ui.event.TerritorySelectedEvent;
+import edu.uph.learn.maharadja.ui.state.TileSelectionState;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.beans.property.ObjectProperty;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.paint.Color;
+import javafx.util.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,10 +39,16 @@ import java.util.Stack;
 
 @SuppressWarnings( {"FieldCanBeLocal", "unused", "MismatchedQueryAndUpdateOfCollection"})
 public class MapPane extends ScrollPane {
+  private static final Logger LOG = LoggerFactory.getLogger(MapPane.class);
   private final GameMap gameMap;
   private final Map<Point2D, MapTile> mapTileGrid = new HashMap<>();
-  private final Stack<Territory> lastSelectedTerritoryStack = new Stack<>();
-  private final Set<Territory> lastHighlightedTerritory = new HashSet<>();
+  private final Map<Territory, Timeline> highlightAnimation = new HashMap<>();
+  private final ObservableList<Territory> sourceTerritoryOptions = TileSelectionState.get().getValidSources();
+  private final ObservableList<Territory> targetTerritoryOptions = TileSelectionState.get().getValidTargets();
+  private final ObjectProperty<Territory> selectedSource = TileSelectionState.get().selectedSourceProperty();
+  private final ObjectProperty<Territory> selectedTarget = TileSelectionState.get().selectedTargetProperty();
+  private final ObjectProperty<Territory> selectedDetail = TileSelectionState.get().selectedDetailProperty();
+  private final EventHandler<? super MouseEvent> onClickMapTile;
 
   public MapPane(GameMap gameMap) {
     super(new Pane(new Group()));
@@ -39,14 +56,49 @@ public class MapPane extends ScrollPane {
     EventBus.registerListener(GamePhaseEvent.class, this::onGamePhaseEvent);
     EventBus.registerListener(CombatResultEvent.class, this::onCombatResultEvent);
     EventBus.registerListener(TerritoryOccupiedEvent.class, this::onTerritoryOccupiedEvent);
-    EventBus.registerListener(TerritorySelectedEvent.class, this::onTerritorySelectedEvent);
-    EventBus.registerListener(TerritoryHighlightedEvent.class, this::onTerritoryHighlightedEvent);
     this.gameMap = gameMap;
+    onClickMapTile = e -> {
+      MapTile clickedMapTile = (MapTile) e.getSource();
+      Territory clickedTerritory = clickedMapTile.getTerritory();
+      if (Objects.equals(selectedSource.get(), clickedTerritory)) {
+        selectedSource.set(null);
+      } else if (Objects.equals(selectedTarget.get(), clickedTerritory)) {
+        selectedTarget.set(null);
+      } else if (Objects.equals(selectedDetail.get(), clickedTerritory)) {
+        selectedDetail.set(null);
+      } else if (sourceTerritoryOptions.contains(clickedTerritory)) {
+        selectedSource.set(clickedTerritory);
+      } else if (targetTerritoryOptions.contains(clickedTerritory)) {
+        selectedTarget.set(clickedTerritory);
+      } else {
+        selectedDetail.set(clickedTerritory);
+      }
+    };
     HBox.setHgrow(this, Priority.ALWAYS);
     setPannable(true);
     Pane content = (Pane) getContent();
     Group hexGroup = (Group) content.getChildren().getFirst();
     populateMapTile(hexGroup, gameMap);
+
+    selectedSource.addListener((obs, oldVal, newVal) -> {
+      LOG.info("Selected Source: {} -> {}", printTerritory(oldVal), printTerritory(newVal));
+      clearAll();
+      selectTile(oldVal, false);
+      selectTile(newVal, true);
+    });
+    selectedTarget.addListener((obs, oldVal, newVal) -> {
+      LOG.info("Selected Target: {} -> {}", printTerritory(oldVal), printTerritory(newVal));
+      selectTile(oldVal, false);
+      selectTile(newVal, true);
+    });
+    sourceTerritoryOptions.addListener((ListChangeListener<Territory>) change -> {
+      targetTerritoryOptions.forEach(this::clearHighlight);
+      sourceTerritoryOptions.forEach(this::highlightTile);
+    });
+    targetTerritoryOptions.addListener((ListChangeListener<Territory>) change -> {
+      sourceTerritoryOptions.forEach(this::clearHighlight);
+      targetTerritoryOptions.forEach(this::highlightTile);
+    });
   }
 
   //region event listeners
@@ -74,40 +126,10 @@ public class MapPane extends ScrollPane {
         .ifPresent(prop -> prop.set(territoryOccupiedEvent.player()));
   }
 
-  private void onTerritorySelectedEvent(TerritorySelectedEvent territorySelectedEvent) {
-    Territory territory = territorySelectedEvent.territory();
-    Optional.ofNullable(mapTileGrid.get(territory.getPoint()))
-        .ifPresent(mapTile -> {
-          if (mapTile.selectedProperty().get()) {
-            clearSelection(mapTile);
-            return;
-          }
-          TurnPhase currentPhase = GameState.get().currentPhase();
-          if (currentPhase != TurnPhase.ATTACK && currentPhase != TurnPhase.FORTIFY) {
-            clearSelection();
-          }
-          if (territorySelectedEvent.type() == TerritorySelectedEvent.SelectionType.FROM) {
-            clearSelection();
-            highlightTile(false);
-          } else if (territorySelectedEvent.type() == TerritorySelectedEvent.SelectionType.TO) {
-            if (lastSelectedTerritoryStack.size() >= 2) {
-              Territory lastSelectedTerritory = lastSelectedTerritoryStack.pop();
-              Optional.ofNullable(mapTileGrid.get(lastSelectedTerritory.getPoint()))
-                  .ifPresent(lastSelectedMapTile -> lastSelectedMapTile.selectedProperty().set(false));
-            }
-          }
-          selectTile(mapTile, territory);
-        });
-  }
-
-  private void onTerritoryHighlightedEvent(TerritoryHighlightedEvent territoryHighlightedEvent) {
-    clearHighlight();
-    lastHighlightedTerritory.addAll(territoryHighlightedEvent.territories());
-    highlightTile();
-  }
-
   private void onGamePhaseEvent(GamePhaseEvent gamePhaseEvent) {
-    clearSelection();
+    selectedSource.set(null);
+    selectedTarget.set(null);
+    clearAll();
   }
   //endregion
 
@@ -130,6 +152,7 @@ public class MapPane extends ScrollPane {
         Territory territory = grid.get(point);
         if (territory != null) {
           MapTile territoryTile = new MapTile(territory);
+          territoryTile.setOnMouseClicked(onClickMapTile);
           hexGroup.getChildren().add(territoryTile);
           mapTileGrid.put(point, territoryTile);
           continue;
@@ -141,45 +164,80 @@ public class MapPane extends ScrollPane {
     }
   }
 
-  private void selectTile(MapTile mapTile, Territory territory) {
-    lastSelectedTerritoryStack.add(territory);
-    mapTile.selectedProperty().set(true);
-  }
-
-  private void clearSelection() {
-    clearSelection(null);
-  }
-
-  private void clearSelection(MapTile mapTile) {
-    lastSelectedTerritoryStack.stream()
+  private void selectTile(Territory territory, boolean selected) {
+    Optional.ofNullable(territory)
         .map(Territory::getPoint)
         .map(mapTileGrid::get)
-        .filter(t -> mapTile == null || Objects.equals(mapTile, t))
-        .forEach(selectedMapTile -> selectedMapTile.selectedProperty().set(false));
+        .ifPresent(mapTile -> mapTile.selectedProperty().set(selected));
+  }
+
+  private void clearHighlight(Territory territory) {
+    highlightTile(territory, false);
+  }
+
+  private void highlightTile(Territory territory) {
+    highlightTile(territory, true);
+  }
+
+  private void highlightTile(Territory territory, boolean highlighted) {
+    Optional.ofNullable(territory)
+        .map(Territory::getPoint)
+        .map(mapTileGrid::get)
+        .ifPresent(mapTile -> {
+          mapTile.highlightedProperty().set(highlighted);
+          if (highlighted) {
+            highlightAnimation.put(territory, getHighlightAnimation(mapTile));
+          } else {
+            Optional.ofNullable(highlightAnimation.get(territory))
+                .ifPresent(Timeline::stop);
+            highlightAnimation.remove(territory);
+          }
+        });
+  }
+
+  private void clearAll() {
+    for (Map.Entry<Point2D, MapTile> entry : mapTileGrid.entrySet()) {
+      highlightTile(entry.getValue().getTerritory(), false);
+    }
+  }
+
+  private Timeline getHighlightAnimation(MapTile mapTile) {
     if (mapTile == null) {
-      lastSelectedTerritoryStack.clear();
-    } else {
-      lastSelectedTerritoryStack.remove(mapTile.getTerritory());
+      return null;
     }
+
+    Color color = (Color) mapTile.fillProperty().get();
+    double originalOpacity = color.getOpacity();
+    Timeline timeline = new Timeline(
+        new KeyFrame(
+            Duration.ZERO,
+            new KeyValue(mapTile.strokeWidthProperty(), 3.0),
+            new KeyValue(mapTile.fillProperty(), Color.color(color.getRed(), color.getGreen(), color.getBlue(), originalOpacity))
+        ),
+        new KeyFrame(
+            Duration.seconds(1),
+            new KeyValue(mapTile.strokeWidthProperty(), 2.0),
+            new KeyValue(mapTile.fillProperty(), Color.color(color.getRed(), color.getGreen(), color.getBlue(), 0.7))
+        )
+    );
+    timeline.setAutoReverse(true);
+    timeline.setCycleCount(Animation.INDEFINITE);
+    timeline.play();
+    return timeline;
   }
 
-  private void clearHighlight() {
-    highlightTile(false);
+  private static String printTerritory(Territory oldVal) {
+    return Optional.ofNullable(oldVal).map(Territory::getName).orElse("NULL");
   }
 
-  private void highlightTile() {
-    highlightTile(true);
-  }
-
-  private void highlightTile(boolean highlighted) {
-    lastHighlightedTerritory.stream()
-        .map(Territory::getPoint)
-        .map(mapTileGrid::get)
-        .map(MapTile::highlightedProperty)
-        .forEach(property -> property.set(highlighted));
-    if (!highlighted) {
-      lastHighlightedTerritory.clear();
+  private Object printTerritory(List<? extends Territory> territoryList) {
+    StringBuilder print = new StringBuilder();
+    for (Territory territory : territoryList) {
+      print.append(territory.getName());
+      print.append(",");
     }
+    print.deleteCharAt(print.length() - 1);
+    return print.toString();
   }
   //endregion
 }

@@ -4,7 +4,6 @@ public class TextResource {
   public static final String DRAFT_TITLE = "Draft Troop!";
   public static final String ATTACK_TITLE = "Attack";
   public static final String ATTACK_ACTION = "ATTACK";
-  public static final String ATTACK_END_ACTION = "NEXT PHASE";
   public static final String ATTACK_FIRST_HINT = "Select your tile for reinforcement!";
   public static final String ATTACK_SECOND_HINT = "Select opponent tile to attack!";
   public static final String ATTACK_SOURCE_TERRITORY_LABEL = "Select Territory to attack from:";
@@ -15,6 +14,7 @@ public class TextResource {
   public static final String FORTIFY_SOURCE_TERRITORY_LABEL = "Select Territory to move from:";
   public static final String FORTIFY_TARGET_TERRITORY_LABEL = "Select fortify target:";
   public static final String FORTIFY_NUM_OF_TROOPS_LABEL = "# of Moved Troops:";
+  public static final String END_ACTION = "NEXT PHASE";
 
   private TextResource() {}
 }

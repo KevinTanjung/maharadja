@@ -1,6 +1,5 @@
 package edu.uph.learn.maharadja.ui.form;
 
-import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.common.UI;
 import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.GameEngine;
@@ -13,7 +12,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -143,10 +141,6 @@ public class DraftTroopForm extends BaseActionForm {
     }
 
     setVisible(true);
-  }
-
-  private static Button renderButton(String label) {
-    return ButtonFactory.square(label, UI.UNIT * 3, Color.VOLCANIC_BLACK, Color.SLATE_GRAY);
   }
 
   private void resetForm() {

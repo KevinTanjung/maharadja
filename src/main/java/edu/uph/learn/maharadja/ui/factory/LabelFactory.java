@@ -25,15 +25,7 @@ public class LabelFactory {
   public static Label troopLabel() {
     double size = UI.LARGE;
     Label label = new Label();
-    label.setStyle(
-        "-fx-background-color: " + Color.VOLCANIC_BLACK.toHex() + "; "
-            + "-fx-background-radius: " + ((int) size) + "px;"
-            + "-fx-border-color: " + Color.VOLCANIC_BLACK.toHex() + "; "
-            + "-fx-border-radius: " + ((int) size) + "px;"
-            + "-fx-font-weight: bold;"
-            + "-fx-text-fill: " + Color.IVORY_WHITE.toHex() + ";"
-            + "-fx-alignment: center;"
-    );
+    label.setStyle(troopLabelStyle(Color.VOLCANIC_BLACK, Color.IVORY_WHITE));
     label.setFont(UI.SMALL_FONT);
     label.setMinWidth(size);
     label.setPrefWidth(size);
@@ -45,6 +37,16 @@ public class LabelFactory {
     label.setLayoutY(size * -1 / 2);
     label.setMouseTransparent(true);
     return label;
+  }
+
+  public static String troopLabelStyle(Color backgroundColor, Color textColor) {
+    return "-fx-background-color: " + backgroundColor.toHex() + "; "
+        + "-fx-background-radius: " + ((int) UI.LARGE) + "px;"
+        + "-fx-border-color: " + backgroundColor.toHex() + "; "
+        + "-fx-border-radius: " + ((int) UI.LARGE) + "px;"
+        + "-fx-font-weight: bold;"
+        + "-fx-text-fill: " + textColor.toHex() + ";"
+        + "-fx-alignment: center;";
   }
 
   private LabelFactory() {

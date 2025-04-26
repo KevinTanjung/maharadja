@@ -6,10 +6,10 @@ import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.TurnPhase;
 import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
 import edu.uph.learn.maharadja.ui.TextResource;
-import edu.uph.learn.maharadja.ui.event.TerritorySelectedEvent;
 import edu.uph.learn.maharadja.ui.factory.LabelFactory;
 import edu.uph.learn.maharadja.ui.form.AttackTerritoryForm;
 import edu.uph.learn.maharadja.ui.form.DraftTroopForm;
+import edu.uph.learn.maharadja.ui.form.EndableActionForm;
 import edu.uph.learn.maharadja.ui.form.FortifyTerritoryForm;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
@@ -28,11 +28,7 @@ public class ActionPane extends BorderPane {
   private final AttackTerritoryForm attackTerritoryForm;
   private final FortifyTerritoryForm fortifyTerritoryForm;
 
-  //private final ObjectProperty<MapTile> sourceTile = new SimpleObjectProperty<>();
-  //private final ObjectProperty<MapTile> destinationTile = new SimpleObjectProperty<>();
-
   public ActionPane() {
-    EventBus.registerListener(TerritorySelectedEvent.class, this::onTerritorySelectedEvent);
     EventBus.registerListener(GamePhaseEvent.class, this::onGamePhase);
     this.draftTroopForm = new DraftTroopForm();
     this.attackTerritoryForm = new AttackTerritoryForm();
@@ -70,33 +66,6 @@ public class ActionPane extends BorderPane {
     Thread.sleep(250);
   }
 
-  private void onTerritorySelectedEvent(TerritorySelectedEvent event) {
-    //if (event.eventSource() instanceof ActionPane) return;
-
-    //if (GameState.get().currentPhase() == TurnPhase.ATTACK) {
-    //  sourceTile.set(event.mapTile());
-    //  return;
-    //}
-    //sourceTile = event.mapTile();
-    //setCenter(null);
-    //setTop(new Label(sourceTile.getTerritory().getName()));
-    //GridPane pane = new GridPane();
-    //setCenter(pane);
-    //
-    //Button button = new Button("Back");
-    //button.setOnMouseClicked(mouseEvent -> {
-    //  switch (GameState.get().currentPhase()) {
-    //    case DRAFT:
-    //      renderDraftAction();
-    //      break;
-    //    case ATTACK:
-    //      renderAttackAction();
-    //      break;
-    //  }
-    //});
-    //setBottom(button);
-  }
-
   private void renderDraftAction() {
     setTop(LabelFactory.create(
         TextResource.DRAFT_TITLE,
@@ -116,13 +85,7 @@ public class ActionPane extends BorderPane {
         Color.IVORY_WHITE,
         UI.TAB_WIDTH - UI.UNIT
     ));
-    setCenter(attackTerritoryForm);
-    HBox hbox = new HBox(UI.UNIT);
-    HBox.setHgrow(attackTerritoryForm.getSubmitButton(), Priority.ALWAYS);
-    HBox.setHgrow(attackTerritoryForm.getEndButton(), Priority.ALWAYS);
-    hbox.getChildren().addAll(attackTerritoryForm.getSubmitButton(), attackTerritoryForm.getEndButton());
-    setBottom(hbox);
-    attackTerritoryForm.setVisible(true);
+    renderEndableActionForm(attackTerritoryForm);
   }
 
   private void renderFortifyAction() {
@@ -132,8 +95,16 @@ public class ActionPane extends BorderPane {
         Color.VOLCANIC_BLACK,
         UI.TAB_WIDTH - UI.UNIT
     ));
-    setCenter(fortifyTerritoryForm);
-    setBottom(fortifyTerritoryForm.getSubmitButton());
-    fortifyTerritoryForm.setVisible(true);
+    renderEndableActionForm(fortifyTerritoryForm);
+  }
+
+  private void renderEndableActionForm(EndableActionForm form) {
+    setCenter(form);
+    HBox hbox = new HBox(UI.UNIT);
+    HBox.setHgrow(form.getSubmitButton(), Priority.ALWAYS);
+    HBox.setHgrow(form.getEndButton(), Priority.ALWAYS);
+    hbox.getChildren().addAll(form.getSubmitButton(), form.getEndButton());
+    setBottom(hbox);
+    form.setVisible(true);
   }
 }

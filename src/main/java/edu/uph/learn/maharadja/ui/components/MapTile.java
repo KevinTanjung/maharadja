@@ -1,14 +1,13 @@
 package edu.uph.learn.maharadja.ui.components;
 
 import edu.uph.learn.maharadja.common.Color;
-import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.Player;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.ui.TileType;
-import edu.uph.learn.maharadja.ui.event.TerritorySelectedEvent;
 import edu.uph.learn.maharadja.ui.factory.LabelFactory;
 import edu.uph.learn.maharadja.utils.UIUtil;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -17,8 +16,11 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.util.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -28,6 +30,7 @@ import static edu.uph.learn.maharadja.common.UI.HEX_SIZE;
  * Inspired by <a href="https://www.redblobgames.com/grids/hexagons-v1">source</a>
  */
 public class MapTile extends Group {
+  private static final Logger log = LoggerFactory.getLogger(MapTile.class);
   private final ObjectProperty<Player> owner = new SimpleObjectProperty<>(null);
   private final SimpleIntegerProperty numberOfTroops = new SimpleIntegerProperty(1);
   private final SimpleBooleanProperty selected = new SimpleBooleanProperty(false);
@@ -73,20 +76,53 @@ public class MapTile extends Group {
     }
 
     hex.setStroke(territory.getRegion().getColor().get());
-    hex.fillProperty().bind(Bindings.createObjectBinding(
-        () -> Optional.ofNullable(owner.get())
-            .map(Player::getColor)
-            .map(color -> UIUtil.alpha(color, selected.get() ? 1.0 : (highlighted.get() ? 0.6 : 0.3)))
-            .orElseGet(Color.IVORY_WHITE::get),
-        owner,
-        highlighted,
-        selected
-    ));
+    owner.addListener((obs, oldVal, newVal) -> {
+      log.info("New Owner {}", newVal);
+      fillBackground(newVal, selected.get(), highlighted.get());
+    });
+    selected.addListener((obs, oldVal, newVal) -> fillBackground(owner.get(), newVal, highlighted.get()));
+    highlighted.addListener((obs, oldVal, newVal) -> fillBackground(owner.get(), selected.get(), newVal));
     setMouseEvent();
     renderToolTip();
     Label label = LabelFactory.troopLabel();
     label.textProperty().bind(numberOfTroops.asString());
     getChildren().addAll(hex, label);
+
+    selectedProperty().addListener((obs, oldVal, newVal) -> {
+      if (newVal) {
+        hex.setStrokeWidth(4.5);
+        label.setStyle(LabelFactory.troopLabelStyle(Color.IMPERIAL_GOLD, Color.VOLCANIC_BLACK));
+      } else {
+        label.setStyle(LabelFactory.troopLabelStyle(Color.VOLCANIC_BLACK, Color.IVORY_WHITE));
+        if (highlighted.get()) {
+          hex.setStrokeWidth(3.0);
+        } else {
+          hex.setStrokeWidth(1.0);
+        }
+      }
+    });
+    highlightedProperty().addListener((obs, oldVal, newVal) -> {
+      if (selected.get()) {
+        hex.setStrokeWidth(4.5);
+        label.setStyle(LabelFactory.troopLabelStyle(Color.IMPERIAL_GOLD, Color.VOLCANIC_BLACK));
+      } else {
+        label.setStyle(LabelFactory.troopLabelStyle(Color.VOLCANIC_BLACK, Color.IVORY_WHITE));
+        if (newVal) {
+          hex.setStrokeWidth(3.0);
+        } else {
+          hex.setStrokeWidth(1.0);
+        }
+      }
+    });
+  }
+
+  private void fillBackground(Player owner, boolean selected, boolean highlighted) {
+    var newColor = Optional.ofNullable(owner)
+        .map(Player::getColor)
+        .map(color -> UIUtil.alpha(color, selected ? 1.0 : (highlighted ? 0.6 : 0.2)))
+        .orElseGet(Color.IVORY_WHITE::get);
+    log.info(String.format("[%s] New Color: %.2f %s", territory.getName(), newColor.getOpacity(), newColor));
+    hex.setFill(newColor);
   }
 
   private void renderToolTip() {
@@ -109,15 +145,18 @@ public class MapTile extends Group {
   }
 
   private void setMouseEvent() {
-    setOnMouseEntered(e -> {
-      hex.setStrokeWidth(2);
+    hex.setOnMouseEntered(e -> {
+      if (!highlighted.get() && !selected.get()) {
+        hex.setStrokeWidth(3.0);
+      }
       setCursor(Cursor.HAND);
     });
-    setOnMouseExited(e -> {
-      hex.setStrokeWidth(1);
+    hex.setOnMouseExited(e -> {
+      if (!highlighted.get() && !selected.get()) {
+        hex.setStrokeWidth(1.0);
+      }
       setCursor(Cursor.DEFAULT);
     });
-    setOnMouseClicked(e -> EventBus.emit(new TerritorySelectedEvent(this, territory, null)));
   }
 
   public SimpleBooleanProperty selectedProperty() {
@@ -134,6 +173,14 @@ public class MapTile extends Group {
 
   public SimpleIntegerProperty numberOfTroopsProperty() {
     return numberOfTroops;
+  }
+
+  public DoubleProperty strokeWidthProperty() {
+    return hex.strokeWidthProperty();
+  }
+
+  public ObjectProperty<Paint> fillProperty() {
+    return hex.fillProperty();
   }
 
   public Territory getTerritory() {

@@ -101,4 +101,11 @@ public class Player {
   public int hashCode() {
     return Objects.hashCode(sessionId);
   }
+
+  @Override
+  public String toString() {
+    return "Player{" +
+        "username='" + username + '\'' +
+        '}';
+  }
 }

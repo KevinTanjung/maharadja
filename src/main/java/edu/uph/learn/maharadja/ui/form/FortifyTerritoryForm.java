@@ -2,22 +2,20 @@ package edu.uph.learn.maharadja.ui.form;
 
 import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.common.UI;
-import edu.uph.learn.maharadja.event.Event;
 import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.GameEngine;
 import edu.uph.learn.maharadja.game.GameState;
+import edu.uph.learn.maharadja.game.TurnPhase;
 import edu.uph.learn.maharadja.game.event.FortifyPhaseEvent;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.ui.TextResource;
-import edu.uph.learn.maharadja.ui.event.TerritoryHighlightedEvent;
-import edu.uph.learn.maharadja.ui.event.TerritorySelectedEvent;
-import edu.uph.learn.maharadja.ui.factory.ButtonFactory;
+import edu.uph.learn.maharadja.ui.state.TileSelectionState;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContentDisplay;
@@ -34,44 +32,19 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
-public class FortifyTerritoryForm extends BaseActionForm {
+public class FortifyTerritoryForm extends EndableActionForm {
   private static final Logger LOG = LoggerFactory.getLogger(FortifyTerritoryForm.class);
 
-  private final Button submitButton;
-  private final ObjectProperty<Territory> sourceTerritory = new SimpleObjectProperty<>();
-  private final ObjectProperty<Territory> targetTerritory = new SimpleObjectProperty<>();
+  private final ObservableList<Territory> sourceTerritoryOptions = TileSelectionState.get().getValidSources();
+  private final ObservableList<Territory> targetTerritoryOptions = TileSelectionState.get().getValidTargets();
+  private final ObjectProperty<Territory> sourceTerritory = TileSelectionState.get().selectedSourceProperty();
+  private final ObjectProperty<Territory> targetTerritory = TileSelectionState.get().selectedTargetProperty();
   private final SimpleIntegerProperty numOfTroops = new SimpleIntegerProperty();
-  private final ObservableList<Territory> sourceTerritoryOptions = FXCollections.observableArrayList();
-  private final ObservableList<Territory> targetTerritoryOptions = FXCollections.observableArrayList();
 
   public FortifyTerritoryForm() {
     super();
     EventBus.registerListener(FortifyPhaseEvent.class, this::onFortifyPhaseEvent);
-    EventBus.registerListener(TerritorySelectedEvent.class, this::onTerritorySelectedEvent);
-
-    setBackground(Background.fill(Color.IVORY_WHITE.get()));
-    setFitToWidth(true);
-    setFitToHeight(true);
-    setHbarPolicy(ScrollBarPolicy.NEVER);
-
-    // Fortify Button
-    submitButton = ButtonFactory.create(
-        TextResource.FORTIFY_ACTION,
-        UI.TAB_WIDTH - UI.UNIT,
-        Color.VOLCANIC_BLACK,
-        Color.SKY_BLUE
-    );
-    submitButton.setOnAction(actionEvent -> {
-      List<Territory> deploymentStep = GameEngine.get().fortifyTerritory(
-          sourceTerritory.get(),
-          targetTerritory.get(),
-          numOfTroops.get()
-      );
-      LOG.info("Fortify success with deploymentStep {}", deploymentStep.stream().map(Territory::getName).toList());
-    });
-
 
     VBox vBox = new VBox(UI.SMALL);
     vBox.setMaxWidth(UI.TAB_WIDTH - UI.UNIT);
@@ -85,16 +58,20 @@ public class FortifyTerritoryForm extends BaseActionForm {
     sourceTerritoryChoiceBox.setItems(sourceTerritoryOptions);
     sourceTerritoryChoiceBox.valueProperty().bindBidirectional(sourceTerritory);
     sourceTerritoryChoiceBox.setConverter(new TerritoryStringConverter());
-    sourceTerritoryChoiceBox.setOnAction(event -> {
-      Territory selectedItem = sourceTerritoryChoiceBox.getSelectionModel().getSelectedItem();
-      if (selectedItem == null) {
-        return;
+    sourceTerritory.addListener((obs, oldVal, newVal) -> {
+      if (GameState.get().currentPhase() != TurnPhase.FORTIFY) return;
+      targetTerritory.set(null);
+      if (newVal == null) {
+        numOfTroops.set(0);
+        targetTerritoryOptions.clear();
+      } else {
+        numOfTroops.setValue(1);
+        targetTerritoryOptions.setAll(
+            GameEngine.get()
+                .getFortifiableTerritories(newVal)
+                .toArray(Territory[]::new)
+        );
       }
-      EventBus.emit(new TerritorySelectedEvent(this, selectedItem, TerritorySelectedEvent.SelectionType.FROM));
-      List<Territory> fortifiableTerritories = GameEngine.get().getFortifiableTerritories(selectedItem);
-      numOfTroops.setValue(1);
-      targetTerritoryOptions.setAll(fortifiableTerritories.toArray(Territory[]::new));
-      EventBus.emit(new TerritoryHighlightedEvent(Set.copyOf(fortifiableTerritories)));
     });
     HBox.setHgrow(sourceTerritoryChoiceBox, Priority.ALWAYS);
     vBox.getChildren().addAll(sourceTerritoryLabel, sourceTerritoryChoiceBox);
@@ -106,13 +83,6 @@ public class FortifyTerritoryForm extends BaseActionForm {
     targetTerritoryChoiceBox.setItems(targetTerritoryOptions);
     targetTerritoryChoiceBox.valueProperty().bindBidirectional(targetTerritory);
     targetTerritoryChoiceBox.setConverter(new TerritoryStringConverter());
-    targetTerritoryChoiceBox.setOnAction(event -> {
-      Territory selectedItem = targetTerritoryChoiceBox.getSelectionModel().getSelectedItem();
-      if (selectedItem == null) {
-        return;
-      }
-      EventBus.emit(new TerritorySelectedEvent(this, selectedItem, TerritorySelectedEvent.SelectionType.TO));
-    });
     targetTerritoryChoiceBox.disableProperty().bind(sourceTerritory.isNull());
     HBox.setHgrow(targetTerritoryChoiceBox, Priority.ALWAYS);
     vBox.getChildren().addAll(targetTerritoryLabel, targetTerritoryChoiceBox);
@@ -165,30 +135,38 @@ public class FortifyTerritoryForm extends BaseActionForm {
     vBox.getChildren().addAll(numOfTroopLabel, hbox);
   }
 
+  @Override
+  protected EventHandler<ActionEvent> getSubmitButtonListener() {
+    return actionEvent -> {
+      List<Territory> deploymentStep = GameEngine.get().fortifyTerritory(
+          sourceTerritory.get(),
+          targetTerritory.get(),
+          numOfTroops.get()
+      );
+      LOG.info("Fortify success with deploymentStep {}", deploymentStep.stream().map(Territory::getName).toList());
+    };
+  }
+
+  @Override
+  protected String getSubmitButtonTitle() {
+    return TextResource.FORTIFY_ACTION;
+  }
+
+  @Override
+  protected Color getSubmitButtonColor() {
+    return Color.SKY_BLUE;
+  }
+
   private void onFortifyPhaseEvent(FortifyPhaseEvent fortifyPhaseEvent) {
+    numOfTroops.set(0);
     sourceTerritory.set(null);
     targetTerritory.set(null);
-    numOfTroops.set(0);
     targetTerritoryOptions.clear();
-
-    List<Territory> deployableTerritory = new ArrayList<>(fortifyPhaseEvent.deployableTerritory())
-        .stream()
-        .filter(territory -> !GameEngine.get().getFortifiableTerritories(territory).isEmpty())
-        .sorted(Comparator.comparingInt(Territory::getNumberOfStationedTroops).reversed())
-        .toList();
-    // TODO: filter non "deployable" territory since there are no friendly neighbor
-    sourceTerritoryOptions.setAll(deployableTerritory.toArray(Territory[]::new));
-  }
-
-  private void onTerritorySelectedEvent(TerritorySelectedEvent territorySelectedEvent) {
-    // TODO impl
-  }
-
-  public Button getSubmitButton() {
-    return submitButton;
-  }
-
-  private Button renderButton(String label) {
-    return ButtonFactory.square(label, UI.UNIT * 3, Color.VOLCANIC_BLACK, Color.SLATE_GRAY);
+    sourceTerritoryOptions.setAll(
+        new ArrayList<>(fortifyPhaseEvent.deployableTerritory()).stream()
+            .filter(territory -> !GameEngine.get().getFortifiableTerritories(territory).isEmpty())
+            .sorted(Comparator.comparingInt(Territory::getNumberOfStationedTroops).reversed())
+            .toArray(Territory[]::new)
+    );
   }
 }
