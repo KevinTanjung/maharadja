@@ -1,4 +1,4 @@
-package edu.uph.learn.maharadja.utils;
+package edu.uph.learn.maharadja.common;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;

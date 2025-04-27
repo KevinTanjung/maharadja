@@ -1,11 +1,11 @@
 package edu.uph.learn.maharadja.ui.components;
 
 import edu.uph.learn.maharadja.common.Color;
-import edu.uph.learn.maharadja.game.Player;
+import edu.uph.learn.maharadja.player.Player;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.ui.TileType;
 import edu.uph.learn.maharadja.ui.factory.LabelFactory;
-import edu.uph.learn.maharadja.utils.UIUtil;
+import edu.uph.learn.maharadja.common.UIUtil;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;

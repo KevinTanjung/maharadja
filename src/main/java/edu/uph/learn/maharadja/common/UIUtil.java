@@ -1,6 +1,5 @@
-package edu.uph.learn.maharadja.utils;
+package edu.uph.learn.maharadja.common;
 
-import edu.uph.learn.maharadja.common.Color;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;

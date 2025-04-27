@@ -1,7 +1,7 @@
 package edu.uph.learn.maharadja.map;
 
 import edu.uph.learn.maharadja.common.Color;
-import edu.uph.learn.maharadja.game.Player;
+import edu.uph.learn.maharadja.player.Player;
 
 import java.util.Collections;
 import java.util.HashSet;

@@ -2,6 +2,8 @@ package edu.uph.learn.maharadja.game;
 
 import edu.uph.learn.maharadja.common.Constant;
 import edu.uph.learn.maharadja.map.GameMap;
+import edu.uph.learn.maharadja.player.Player;
+import edu.uph.learn.maharadja.player.SimpleBot;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +27,7 @@ public class GameState {
     activeTurnPhase = TurnPhase.START;
     // First, fill all players with Computer
     for (int i = 1; i <= Constant.MAX_PLAYERS; i++) {
-      playerList.add(Player.computer(i));
+      playerList.add(new SimpleBot(i));
     }
   }
 

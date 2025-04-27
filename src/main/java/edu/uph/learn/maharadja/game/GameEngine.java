@@ -14,8 +14,9 @@ import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
 import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.Region;
 import edu.uph.learn.maharadja.map.Territory;
-import edu.uph.learn.maharadja.utils.DiceRoll;
-import edu.uph.learn.maharadja.utils.TerritoryUtil;
+import edu.uph.learn.maharadja.player.Player;
+import edu.uph.learn.maharadja.common.DiceRoll;
+import edu.uph.learn.maharadja.common.TerritoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

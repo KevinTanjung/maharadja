@@ -1,4 +1,4 @@
-package edu.uph.learn.maharadja.utils;
+package edu.uph.learn.maharadja.common;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;

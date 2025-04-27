@@ -1,6 +1,6 @@
 package edu.uph.learn.maharadja.map;
 
-import edu.uph.learn.maharadja.game.Player;
+import edu.uph.learn.maharadja.player.Player;
 import javafx.geometry.Point2D;
 
 import java.util.Objects;

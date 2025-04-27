@@ -3,6 +3,7 @@ package edu.uph.learn.maharadja.game;
 import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.map.GameMapLoader;
 import edu.uph.learn.maharadja.map.MapType;
+import edu.uph.learn.maharadja.player.Player;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,11 +17,11 @@ public class TestGameEngine {
     GameState state = new GameState();
     assertEquals(
         RegisterPlayerResult.SUCCESS,
-        state.registerPlayer(Player.user("Ken Dedes"))
+        state.registerPlayer(new Player("Ken Dedes"))
     );
     assertEquals(
         RegisterPlayerResult.SUCCESS,
-        state.registerPlayer(Player.user("Ken Arok"))
+        state.registerPlayer(new Player("Ken Arok"))
     );
     state.start();
 

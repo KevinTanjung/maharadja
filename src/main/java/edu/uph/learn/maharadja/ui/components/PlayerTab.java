@@ -4,7 +4,7 @@ import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.common.UI;
 import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.GameState;
-import edu.uph.learn.maharadja.game.Player;
+import edu.uph.learn.maharadja.player.Player;
 import edu.uph.learn.maharadja.game.TurnPhase;
 import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
 import edu.uph.learn.maharadja.game.event.TroopMovementEvent;

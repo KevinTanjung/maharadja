@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static edu.uph.learn.maharadja.utils.ObjectMapperUtil.OBJECT_MAPPER;
+import static edu.uph.learn.maharadja.common.ObjectMapperUtil.OBJECT_MAPPER;
 
 /**
  * Helper to load the map from a JSON file into our desired data structure stored in {@link GameMap}.

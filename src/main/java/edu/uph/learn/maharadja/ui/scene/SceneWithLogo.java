@@ -2,7 +2,6 @@ package edu.uph.learn.maharadja.ui.scene;
 
 import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.common.UI;
-import edu.uph.learn.maharadja.utils.UIUtil;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;

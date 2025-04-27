@@ -2,7 +2,7 @@ package edu.uph.learn.maharadja.ui;
 
 import edu.uph.learn.maharadja.game.GameResult;
 import edu.uph.learn.maharadja.game.GameState;
-import edu.uph.learn.maharadja.game.Player;
+import edu.uph.learn.maharadja.player.Player;
 import edu.uph.learn.maharadja.ui.scene.DefeatScene;
 import edu.uph.learn.maharadja.ui.scene.VictoryScene;
 import edu.uph.learn.maharadja.ui.scene.GameScene;
@@ -38,7 +38,7 @@ public class GameWindow {
     // -- skip attack
     //GameEngine.get().nextPhase();
     // -- go to final state
-    //openEndScene(new GameResult(Player.user("GajahMada"), true));
+    //openEndScene(new GameResult(new Player("GajahMada"), false));
   }
 
   public void openLobby() {
@@ -52,7 +52,7 @@ public class GameWindow {
       boolean isServer
   ) {
     LOG.info("Registering [{}] as [{}]...", username, isServer ? "HOST" : "GUEST");
-    Player player = Player.user(username);
+    Player player = new Player(username);
     GameState.get().registerPlayer(player, true);
     GameState.get().start();
 

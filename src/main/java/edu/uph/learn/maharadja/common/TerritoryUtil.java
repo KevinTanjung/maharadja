@@ -1,6 +1,6 @@
-package edu.uph.learn.maharadja.utils;
+package edu.uph.learn.maharadja.common;
 
-import edu.uph.learn.maharadja.game.Player;
+import edu.uph.learn.maharadja.player.Player;
 import edu.uph.learn.maharadja.map.Territory;
 
 import java.util.List;

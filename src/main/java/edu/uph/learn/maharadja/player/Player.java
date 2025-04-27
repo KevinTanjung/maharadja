@@ -1,4 +1,4 @@
-package edu.uph.learn.maharadja.game;
+package edu.uph.learn.maharadja.player;
 
 import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.map.Territory;
@@ -18,27 +18,18 @@ public class Player {
       Color.COCONUT_HUSK
   );
 
-  private String sessionId;
-  private String ipAddress;
-  private String username;
-  private boolean computer;
+  private final String sessionId;
+  private final String ipAddress;
+  private final String username;
+  protected boolean computer;
   private Color color;
   private final Set<Territory> territories = new HashSet<>();
   private boolean forfeited;
 
-  public static Player user(String username) {
-    Player player = new Player();
-    player.sessionId = UUID.randomUUID().toString();
-    player.ipAddress = "127.0.0.1";
-    player.username = username;
-    return player;
-  }
-
-  public static Player computer(int i) {
-    Player player = Player.user("Computer " + i);
-    player.computer = true;
-    player.color = PLAYER_COLORS.get(i-1);
-    return player;
+  public Player(String username) {
+    sessionId = UUID.randomUUID().toString();
+    ipAddress = "127.0.0.1";
+    this.username = username;
   }
 
   public String getSessionId() {
