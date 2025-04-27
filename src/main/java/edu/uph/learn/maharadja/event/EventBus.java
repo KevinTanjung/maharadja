@@ -24,7 +24,9 @@ public class EventBus {
   }
 
   public static EventBus init() {
-    EventBusHolder.INSTANCE = new EventBus();
+    if (EventBusHolder.INSTANCE == null) {
+      EventBusHolder.INSTANCE = new EventBus();
+    }
     return EventBusHolder.INSTANCE;
   }
   //endregion
