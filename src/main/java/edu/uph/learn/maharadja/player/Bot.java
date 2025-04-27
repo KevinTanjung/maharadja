@@ -9,5 +9,7 @@ import java.util.Optional;
 public interface Bot {
   Map<Territory, Integer> decideTroopDraft(int numOfTroops);
 
+  Optional<TroopMovementDecision> decideTerritoryAttack(List<Territory> deployableTerritories);
+
   Optional<TroopMovementDecision> decideTerritoryFortification(List<Territory> deployableTerritories);
 }
