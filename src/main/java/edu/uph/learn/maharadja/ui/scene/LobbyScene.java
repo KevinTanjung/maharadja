@@ -15,12 +15,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import java.util.Optional;
+
 import static edu.uph.learn.maharadja.common.UI.FORM_WIDTH;
 
 public class LobbyScene extends SceneWithLogo {
   private final GameWindow gameWindow;
   private final SimpleStringProperty usernameProperty = new SimpleStringProperty("");
-  private final ButtonHandler buttonHandler = new ButtonHandler();
   private TextField usernameField;
 
   public LobbyScene(GameWindow gameWindow) {
@@ -60,12 +61,16 @@ public class LobbyScene extends SceneWithLogo {
 
     Button serverButton = ButtonFactory.primary(TextResource.HOST_BUTTON, width);
     HBox.setMargin(serverButton, new Insets(8, 16, 0, 0));
-    serverButton.setOnAction(e -> buttonHandler.handle(true));
+    serverButton.setOnAction(e -> checkUsername()
+        .ifPresent(u -> gameWindow.registerPlayer(u, true))
+    );
     serverButton.disableProperty().bind(usernameProperty.isEmpty());
 
     Button clientButton = ButtonFactory.primary(TextResource.JOIN_BUTTON, width);
     HBox.setMargin(clientButton, new Insets(8, 0, 0, 0));
-    clientButton.setOnAction(e -> buttonHandler.handle(false));
+    clientButton.setOnAction(e -> checkUsername()
+        .ifPresent(u -> gameWindow.registerPlayer(u, false))
+    );
     clientButton.disableProperty().bind(usernameProperty.isEmpty());
 
     container.getChildren().add(new HBox(serverButton, clientButton));
@@ -74,12 +79,11 @@ public class LobbyScene extends SceneWithLogo {
     ((BorderPane) getRoot()).setCenter(container);
   }
 
-  private class ButtonHandler {
-    public void handle(boolean isServer) {
-      String username = usernameField.getText();
-      if (username != null && !username.isEmpty()) {
-        gameWindow.registerPlayer(username, isServer);
-      }
+  private Optional<String> checkUsername() {
+    String username = usernameField.getText();
+    if (username != null && !username.isEmpty()) {
+      return Optional.of(username);
     }
+    return Optional.empty();
   }
 }
