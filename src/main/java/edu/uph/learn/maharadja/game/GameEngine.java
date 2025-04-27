@@ -18,6 +18,7 @@ import edu.uph.learn.maharadja.player.Bot;
 import edu.uph.learn.maharadja.player.Player;
 import edu.uph.learn.maharadja.common.DiceRoll;
 import edu.uph.learn.maharadja.common.TerritoryUtil;
+import edu.uph.learn.maharadja.player.TroopMovementDecision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +29,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static edu.uph.learn.maharadja.game.event.SkipPhaseEvent.SkipReason.DO_NOTHING;
 import static edu.uph.learn.maharadja.game.event.SkipPhaseEvent.SkipReason.NO_DEPLOYABLE_TROOP;
 
 @SuppressWarnings("StatementWithEmptyBody")
@@ -226,8 +229,14 @@ public class GameEngine {
       return;
     }
     EventBus.emit(new FortifyPhaseEvent(currentPlayer, deployableTerritories));
-    if (currentPlayer.isComputer()) {
-      // TODO: aiEngine.fortifyTroops()
+    if (currentPlayer instanceof Bot) {
+      Optional<TroopMovementDecision> optDecision = ((Bot) currentPlayer).decideTerritoryFortification(deployableTerritories);
+      if (optDecision.isPresent()) {
+        fortifyTerritory(optDecision.get().from(), optDecision.get().to(), optDecision.get().numOfTroops());
+      } else {
+        EventBus.emit(new SkipPhaseEvent(currentPlayer, DO_NOTHING));
+        nextPhase();
+      }
     }
   }
 
@@ -271,10 +280,10 @@ public class GameEngine {
     }
   }
 
-  public List<Territory> getAttackableTerritories(Territory origin, Player player) {
+  public List<Territory> getAttackableTerritories(Territory origin) {
     return gameMap.getAdjacentTerritories(origin)
         .stream()
-        .filter(territory -> !Objects.equals(player, territory.getOwner()))
+        .filter(territory -> !Objects.equals(origin.getOwner(), territory.getOwner()))
         .sorted(Comparator.comparingInt(Territory::getNumberOfStationedTroops).reversed())
         .collect(Collectors.toList());
   }

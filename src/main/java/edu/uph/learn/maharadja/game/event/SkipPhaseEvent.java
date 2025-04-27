@@ -7,6 +7,7 @@ public record SkipPhaseEvent(Player player,
                              SkipReason reason) implements Event {
   public enum SkipReason {
     PLAYER_FORFEIT,
-    NO_DEPLOYABLE_TROOP
+    NO_DEPLOYABLE_TROOP,
+    DO_NOTHING
   }
 }

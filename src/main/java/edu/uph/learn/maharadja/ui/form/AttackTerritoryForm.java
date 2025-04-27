@@ -66,7 +66,7 @@ public class AttackTerritoryForm extends EndableActionForm {
         numOfTroops.setValue(newVal.getNumberOfStationedTroops() - 1);
         targetTerritoryOptions.setAll(
             GameEngine.get()
-                .getAttackableTerritories(newVal, GameState.get().currentTurn())
+                .getAttackableTerritories(newVal)
                 .toArray(Territory[]::new)
         );
       }
@@ -152,7 +152,7 @@ public class AttackTerritoryForm extends EndableActionForm {
     targetTerritory.set(null);
     sourceTerritoryOptions.setAll(
         new ArrayList<>(attackPhaseEvent.deployableTerritories()).stream()
-            .filter(territory -> !GameEngine.get().getAttackableTerritories(territory, GameState.get().currentTurn()).isEmpty())
+            .filter(territory -> !GameEngine.get().getAttackableTerritories(territory).isEmpty())
             .sorted(Comparator.comparingInt(Territory::getNumberOfStationedTroops).reversed())
             .toArray(Territory[]::new)
     );
