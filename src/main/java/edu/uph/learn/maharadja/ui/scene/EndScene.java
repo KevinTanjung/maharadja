@@ -27,6 +27,19 @@ public abstract class EndScene extends SceneWithLogo {
     renderEndButtons(gameWindow);
   }
 
+  private void renderSplash() {
+    BorderPane root = (BorderPane) getRoot();
+    ImageView imageView = new ImageView(getSplashImage());
+    imageView.setFitWidth(WIDTH / 2);
+    imageView.setFitHeight(WIDTH / 2);
+    imageView.setPickOnBounds(true);
+    imageView.setPreserveRatio(true);
+    imageView.fitWidthProperty().bind(root.widthProperty().multiply(0.5));
+    StackPane wrapper = new StackPane(imageView);
+    wrapper.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+    root.setCenter(wrapper);
+  }
+
   private void renderEndButtons(GameWindow gameWindow) {
     double width = (FORM_WIDTH / 2) - 8;
     HBox hBox = new HBox();
@@ -61,20 +74,6 @@ public abstract class EndScene extends SceneWithLogo {
     //endregion
 
     hBox.getChildren().addAll(lobbyButton, exitButton);
-  }
-
-
-  public void renderSplash() {
-    BorderPane root = (BorderPane) getRoot();
-    ImageView imageView = new ImageView(getSplashImage());
-    imageView.setFitWidth(WIDTH / 2);
-    imageView.setFitHeight(WIDTH / 2);
-    imageView.setPickOnBounds(true);
-    imageView.setPreserveRatio(true);
-    imageView.fitWidthProperty().bind(root.widthProperty().multiply(0.5));
-    StackPane wrapper = new StackPane(imageView);
-    wrapper.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-    root.setCenter(wrapper);
   }
 
   public abstract String getSplashImage();
