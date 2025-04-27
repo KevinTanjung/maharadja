@@ -1,6 +1,8 @@
 package edu.uph.learn.maharadja.ui.components;
 
 import edu.uph.learn.maharadja.event.EventBus;
+import edu.uph.learn.maharadja.game.GameState;
+import edu.uph.learn.maharadja.game.TurnPhase;
 import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
 import edu.uph.learn.maharadja.game.event.TerritoryOccupiedEvent;
 import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
@@ -66,7 +68,9 @@ public class MapPane extends ScrollPane {
         selectedTarget.set(null);
       } else if (Objects.equals(selectedDetail.get(), clickedTerritory)) {
         selectedDetail.set(null);
-      } else if (sourceTerritoryOptions.contains(clickedTerritory)) {
+      } else if (sourceTerritoryOptions.contains(clickedTerritory)
+          && !targetTerritoryOptions.contains(clickedTerritory)
+      ) {
         selectedSource.set(clickedTerritory);
       } else if (targetTerritoryOptions.contains(clickedTerritory)) {
         selectedTarget.set(clickedTerritory);
@@ -82,7 +86,9 @@ public class MapPane extends ScrollPane {
 
     selectedSource.addListener((obs, oldVal, newVal) -> {
       LOG.info("Selected Source: {} -> {}", printTerritory(oldVal), printTerritory(newVal));
-      clearAll();
+      if (GameState.get().currentPhase() != TurnPhase.DRAFT) {
+        clearAll();
+      }
       selectTile(oldVal, false);
       selectTile(newVal, true);
     });
@@ -92,11 +98,11 @@ public class MapPane extends ScrollPane {
       selectTile(newVal, true);
     });
     sourceTerritoryOptions.addListener((ListChangeListener<Territory>) change -> {
-      targetTerritoryOptions.forEach(this::clearHighlight);
+      clearAll();
       sourceTerritoryOptions.forEach(this::highlightTile);
     });
     targetTerritoryOptions.addListener((ListChangeListener<Territory>) change -> {
-      sourceTerritoryOptions.forEach(this::clearHighlight);
+      clearAll();
       targetTerritoryOptions.forEach(this::highlightTile);
     });
   }

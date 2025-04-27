@@ -3,9 +3,9 @@ package edu.uph.learn.maharadja.ui.components;
 import edu.uph.learn.maharadja.common.UI;
 import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.GameState;
-import edu.uph.learn.maharadja.player.Player;
 import edu.uph.learn.maharadja.game.TurnPhase;
 import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
+import edu.uph.learn.maharadja.player.Player;
 import javafx.geometry.Side;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Priority;
@@ -49,7 +49,7 @@ public class PlayerTabPane extends TabPane {
   }
 
   private void onGamePhaseEvent(GamePhaseEvent gamePhaseEvent) {
-    if (gamePhaseEvent.phase() == TurnPhase.START) {
+    if (gamePhaseEvent.phase() == TurnPhase.DRAFT) {
       PlayerTab currentTurnTab = playerTabMapping.get(gamePhaseEvent.currentPlayer());
       getSelectionModel().select(currentTurnTab);
     }

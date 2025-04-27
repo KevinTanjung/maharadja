@@ -76,10 +76,7 @@ public class MapTile extends Group {
     }
 
     hex.setStroke(territory.getRegion().getColor().get());
-    owner.addListener((obs, oldVal, newVal) -> {
-      log.info("New Owner {}", newVal);
-      fillBackground(newVal, selected.get(), highlighted.get());
-    });
+    owner.addListener((obs, oldVal, newVal) -> fillBackground(newVal, selected.get(), highlighted.get()));
     selected.addListener((obs, oldVal, newVal) -> fillBackground(owner.get(), newVal, highlighted.get()));
     highlighted.addListener((obs, oldVal, newVal) -> fillBackground(owner.get(), selected.get(), newVal));
     setMouseEvent();
@@ -121,7 +118,6 @@ public class MapTile extends Group {
         .map(Player::getColor)
         .map(color -> UIUtil.alpha(color, selected ? 1.0 : (highlighted ? 0.6 : 0.2)))
         .orElseGet(Color.IVORY_WHITE::get);
-    log.info(String.format("[%s] New Color: %.2f %s", territory.getName(), newColor.getOpacity(), newColor));
     hex.setFill(newColor);
   }
 

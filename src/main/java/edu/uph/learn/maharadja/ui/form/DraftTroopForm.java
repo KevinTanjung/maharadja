@@ -6,7 +6,9 @@ import edu.uph.learn.maharadja.game.GameEngine;
 import edu.uph.learn.maharadja.game.event.DraftPhaseEvent;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.ui.factory.ButtonFactory;
+import edu.uph.learn.maharadja.ui.state.TileSelectionState;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -31,6 +33,7 @@ public class DraftTroopForm extends BaseActionForm {
   private final GridPane gridPane;
   private final SimpleIntegerProperty draftedTroop = new SimpleIntegerProperty();
   private final Map<Territory, SimpleIntegerProperty> troopAssignment = new HashMap<>();
+  private final ObservableList<Territory> sourceTerritoryOptions = TileSelectionState.get().getValidSources();
   private final Button submitButton;
 
   public DraftTroopForm() {
@@ -50,6 +53,7 @@ public class DraftTroopForm extends BaseActionForm {
 
     submitButton = ButtonFactory.primary("DEPLOY", UI.TAB_WIDTH - UI.UNIT);
     submitButton.setOnAction(actionEvent -> {
+      sourceTerritoryOptions.clear();
       GameEngine.get().draftTroop(
           troopAssignment.entrySet()
               .stream()
@@ -62,6 +66,7 @@ public class DraftTroopForm extends BaseActionForm {
   void onDraftPhaseEvent(DraftPhaseEvent event) {
     LOG.info("[onDraftPhaseEvent] Player = {}, Number of Troops = {}", event.player().getUsername(), event.numOfTroops());
     resetForm();
+    sourceTerritoryOptions.addAll(event.player().getTerritories());
 
     // Assignable Troop
     Label label = new Label("Deployable Troops:");

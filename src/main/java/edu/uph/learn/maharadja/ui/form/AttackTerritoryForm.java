@@ -13,7 +13,6 @@ import edu.uph.learn.maharadja.ui.TextResource;
 import edu.uph.learn.maharadja.ui.event.CombatResultEvent;
 import edu.uph.learn.maharadja.ui.state.TileSelectionState;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;

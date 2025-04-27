@@ -42,8 +42,8 @@ public class SimpleBot extends Player implements Bot {
 
   @Override
   public Optional<TroopMovementDecision> decideTerritoryAttack(List<Territory> deployableTerritories) {
-    // 5% chance of doing nothing
-    if (RANDOM.nextDouble() < 0.05) {
+    // 20% chance of doing nothing
+    if (RANDOM.nextDouble() < 0.20) {
       return Optional.empty();
     }
 
@@ -86,8 +86,8 @@ public class SimpleBot extends Player implements Bot {
 
   @Override
   public Optional<TroopMovementDecision> decideTerritoryFortification(List<Territory> deployableTerritories) {
-    // 5% chance of doing nothing
-    if (RANDOM.nextDouble() < 0.05) {
+    // 20% chance of doing nothing
+    if (RANDOM.nextDouble() < 0.20) {
       return Optional.empty();
     }
 

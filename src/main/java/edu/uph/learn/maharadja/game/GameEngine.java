@@ -3,7 +3,9 @@ package edu.uph.learn.maharadja.game;
 import edu.uph.learn.maharadja.common.Constant;
 import edu.uph.learn.maharadja.common.DiceRoll;
 import edu.uph.learn.maharadja.common.TerritoryUtil;
+import edu.uph.learn.maharadja.event.BotActionEvent;
 import edu.uph.learn.maharadja.event.EventBus;
+import edu.uph.learn.maharadja.event.RegionForfeitedEvent;
 import edu.uph.learn.maharadja.game.event.AttackPhaseEvent;
 import edu.uph.learn.maharadja.game.event.DraftPhaseEvent;
 import edu.uph.learn.maharadja.game.event.FortifyPhaseEvent;
@@ -19,8 +21,6 @@ import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.player.Bot;
 import edu.uph.learn.maharadja.player.Player;
 import edu.uph.learn.maharadja.player.TroopMovementDecision;
-import edu.uph.learn.maharadja.ui.event.CombatResultEvent;
-import edu.uph.learn.maharadja.ui.state.LoadingState;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -165,28 +166,33 @@ public class GameEngine {
 
   @SneakyThrows
   private void prepareTroopsDraft(Player currentPlayer) {
-    int numOfTroops = 0;
+    AtomicInteger numOfTroops = new AtomicInteger(0);
     // Troops based on owned territories
-    numOfTroops += Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(), 3));
+    numOfTroops.addAndGet(Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(), 3)));
     // Troops based on owned region
     for (Region region : gameMap.getAllRegions()) {
       if (Objects.equals(currentPlayer, region.getOwner())) {
-        numOfTroops += region.getBonusTroops();
+        numOfTroops.addAndGet(region.getBonusTroops());
       }
     }
     // TODO: Troops based on resource
 
-    EventBus.emit(new DraftPhaseEvent(currentPlayer, numOfTroops));
+    EventBus.emit(new DraftPhaseEvent(currentPlayer, numOfTroops.get()));
     if (currentPlayer instanceof Bot bot) {
-      Thread.sleep(2000); // simulate thinking
-      draftTroop(bot.decideTroopDraft(numOfTroops));
+      EventBus.emit(new BotActionEvent(
+          TurnPhase.DRAFT,
+          currentPlayer,
+          () -> draftTroop(bot.decideTroopDraft(numOfTroops.get()))
+      ));
     }
   }
 
   public void draftTroop(Map<Territory, Integer> draftTroopMapping) {
     for (Map.Entry<Territory, Integer> entry : draftTroopMapping.entrySet()) {
       Territory territory = entry.getKey();
-      if (entry.getValue() == 0) continue;
+      if (entry.getValue() == 0) {
+        continue;
+      }
       entry.getKey().deployTroop(entry.getValue());
       LOG.info("Player [{}] drafted [{}] troop(s) to territory [{}/{}], now has [{}] troop(s)",
           territory.getOwner().getUsername(),
@@ -222,21 +228,27 @@ public class GameEngine {
     }
     EventBus.emit(new AttackPhaseEvent(currentPlayer, deployableTerritories));
     if (currentPlayer instanceof Bot bot) {
-      Thread.sleep(2000); // simulate thinking and wait for "previous combat result if any"
-      while (LoadingState.get().isLoading(LoadingState.Key.COMBAT_RESULT)) {
-        Thread.sleep(1000);
-      }
-      Optional<TroopMovementDecision> optDecision = bot.decideTerritoryAttack(deployableTerritories);
-      if (optDecision.isPresent()) {
-        TroopMovementDecision decision = optDecision.get();
-        CombatResult result = performCombat(decision.from(), decision.to(), decision.numOfTroops());
-        EventBus.emit(new CombatResultEvent(decision.from(), decision.to(), result));
-        prepareTerritoryAttack(GameState.get().currentTurn());
-      } else {
-        LOG.info("Bot [{}] decided on ATTACK to DO NOTHING", currentPlayer.getUsername());
-        EventBus.emit(new SkipPhaseEvent(currentPlayer, DO_NOTHING));
-        nextPhase();
-      }
+      EventBus.emit(new BotActionEvent(
+          TurnPhase.ATTACK,
+          currentPlayer,
+          () -> {
+            Optional<TroopMovementDecision> optDecision = bot.decideTerritoryAttack(deployableTerritories);
+            if (optDecision.isPresent()) {
+              TroopMovementDecision decision = optDecision.get();
+              CombatResult result = performCombat(decision.from(), decision.to(), decision.numOfTroops());
+              EventBus.emit(new BotActionEvent(
+                  TurnPhase.ATTACK,
+                  currentPlayer,
+                  Optional.of(result),
+                  () -> prepareTerritoryAttack(GameState.get().currentTurn())
+              ));
+            } else {
+              LOG.info("Bot [{}] decided on ATTACK to DO NOTHING", currentPlayer.getUsername());
+              EventBus.emit(new SkipPhaseEvent(currentPlayer, DO_NOTHING));
+              nextPhase();
+            }
+          }
+      ));
     }
   }
 
@@ -250,15 +262,20 @@ public class GameEngine {
     }
     EventBus.emit(new FortifyPhaseEvent(currentPlayer, deployableTerritories));
     if (currentPlayer instanceof Bot bot) {
-      Thread.sleep(2000); // simulate thinking
-      Optional<TroopMovementDecision> optDecision = bot.decideTerritoryFortification(deployableTerritories);
-      if (optDecision.isPresent()) {
-        fortifyTerritory(optDecision.get().from(), optDecision.get().to(), optDecision.get().numOfTroops());
-      } else {
-        LOG.info("Bot [{}] decided on FORTIFY to DO NOTHING", currentPlayer.getUsername());
-        EventBus.emit(new SkipPhaseEvent(currentPlayer, DO_NOTHING));
-        nextPhase();
-      }
+      EventBus.emit(new BotActionEvent(
+          TurnPhase.FORTIFY,
+          currentPlayer,
+          () -> {
+            Optional<TroopMovementDecision> optDecision = bot.decideTerritoryFortification(deployableTerritories);
+            if (optDecision.isPresent()) {
+              fortifyTerritory(optDecision.get().from(), optDecision.get().to(), optDecision.get().numOfTroops());
+            } else {
+              LOG.info("Bot [{}] decided on FORTIFY to DO NOTHING", currentPlayer.getUsername());
+              EventBus.emit(new SkipPhaseEvent(currentPlayer, DO_NOTHING));
+              nextPhase();
+            }
+          }
+      ));
     }
   }
 
@@ -299,6 +316,13 @@ public class GameEngine {
     if (regionWon) {
       destination.getRegion().setOwner(player);
       EventBus.emit(new RegionOccupiedEvent(destination.getRegion(), player));
+    } else if (
+        Optional.ofNullable(destination.getRegion().getOwner())
+            .filter(regent -> !Objects.equals(regent, player))
+            .isPresent()
+    ) {
+      destination.getRegion().setOwner(null);
+      EventBus.emit(new RegionForfeitedEvent(destination.getRegion(), player));
     }
   }
 
@@ -319,7 +343,7 @@ public class GameEngine {
   }
 
   public CombatResult performCombat(Territory attacker, Territory defender, int attackingTroops) {
-    if (attackingTroops < 1 || attacker.getNumberOfStationedTroops()-1 < attackingTroops) {
+    if (attackingTroops < 1 || attacker.getNumberOfStationedTroops() - 1 < attackingTroops) {
       LOG.info("Not enough or too few attacking troops, desired {} vs actual {}", attackingTroops, attacker.getNumberOfStationedTroops());
       return null;
     }
@@ -378,7 +402,9 @@ public class GameEngine {
   public List<Territory> getFortifiableTerritories(Territory origin) {
     List<Territory> fortifiableTerritories = new ArrayList<>();
     for (Territory ownedTerritory : origin.getOwner().getTerritories()) {
-      if (origin.equals(ownedTerritory)) continue;
+      if (origin.equals(ownedTerritory)) {
+        continue;
+      }
       if (!gameMap.getShortestDeploymentPath(origin, ownedTerritory).isEmpty()) {
         fortifiableTerritories.add(ownedTerritory);
       }
