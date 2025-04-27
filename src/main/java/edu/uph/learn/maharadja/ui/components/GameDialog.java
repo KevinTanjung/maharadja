@@ -36,7 +36,7 @@ public class GameDialog extends Popup {
     FadeTransition fadeIn = new FadeTransition(Duration.millis(500), label);
     fadeIn.setFromValue(0);
     fadeIn.setToValue(1);
-    PauseTransition stayOn = new PauseTransition(Duration.seconds(1.5));
+    PauseTransition stayOn = new PauseTransition(Duration.seconds(task.autoDismissSeconds().orElse(2)));
     FadeTransition fadeOut = new FadeTransition(Duration.millis(500), label);
     fadeOut.setFromValue(1);
     fadeOut.setToValue(0);

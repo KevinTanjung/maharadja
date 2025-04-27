@@ -26,7 +26,7 @@ public class GameMapLoader {
       JsonFile file = OBJECT_MAPPER.readValue(inputStream, JsonFile.class);
       //LOG.info("Parsed region: {}", OBJECT_MAPPER.writeValueAsString(file));
       Map<String, Territory> territoryByName = new HashMap<>();
-      GameMap gameMap = new GameMap(file.columns, file.rows);
+      GameMap gameMap = new GameMap(file.columns, file.rows, mapType.getTile());
 
       for (RegionFile regionFile : file.regions) {
         Region region = new Region(

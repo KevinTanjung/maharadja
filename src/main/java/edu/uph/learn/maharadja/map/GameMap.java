@@ -34,6 +34,7 @@ public class GameMap {
       new int[][] { {1, 0},   {0, -1},     {1, -1},    {-1, 0},      {0, 1},     {1, 1} },      // Odd Row
   };
 
+  final String tile;
   final int q;
   final int r;
   final Map<Point2D, Territory> territoryMap;
@@ -42,12 +43,13 @@ public class GameMap {
   final Map<Territory, Set<Territory>> adjacencyList;
 
   public GameMap() {
-    this(0, 0);
+    this(0, 0, "HEX");
   }
 
-  public GameMap(int q, int r) {
+  public GameMap(int q, int r, String tile) {
     this.q = q;
     this.r = r;
+    this.tile = tile;
     this.territoryMap = new HashMap<>();
     this.regionList = new ArrayList<>();
     this.territoryList = new ArrayList<>();
@@ -73,11 +75,13 @@ public class GameMap {
 
     // compute adjacency, since we store it bidirectional, if a new one attached to a previously added old one,
     // then the old one "neighbor" will be discovered automatically
-    for (int[] direction : AXIAL_NEIGHBORS[territory.getR() % 2]) {
-      Point2D coordinate = new Point2D(territory.getQ() + direction[0], territory.getR() + direction[1]);
-      Optional.ofNullable(territoryMap.get(coordinate))
-          .filter(neighbor -> !neighbor.equals(territory))
-          .ifPresent(neighbor -> addConnection(territory, neighbor));
+    if ("HEX".equals(tile)) {
+      for (int[] direction : AXIAL_NEIGHBORS[territory.getR() % 2]) {
+        Point2D coordinate = new Point2D(territory.getQ() + direction[0], territory.getR() + direction[1]);
+        Optional.ofNullable(territoryMap.get(coordinate))
+            .filter(neighbor -> !neighbor.equals(territory))
+            .ifPresent(neighbor -> addConnection(territory, neighbor));
+      }
     }
   }
 
@@ -124,8 +128,8 @@ public class GameMap {
 
   /**
    * <p>
-   *   Helper to check if two territories are connected by the same owner.
-   *   Return the list of territory
+   * Helper to check if two territories are connected by the same owner.
+   * Return the list of territory
    * </p>
    */
   public List<Territory> getShortestDeploymentPath(
@@ -157,8 +161,12 @@ public class GameMap {
       }
 
       for (Territory next : adjacencyList.get(current)) {
-        if (visited.contains(next)) continue;
-        if (!Objects.equals(next.getOwner(), current.getOwner())) continue;
+        if (visited.contains(next)) {
+          continue;
+        }
+        if (!Objects.equals(next.getOwner(), current.getOwner())) {
+          continue;
+        }
         visited.add(next);
         queue.add(next);
         parentMap.put(next, current);

@@ -4,5 +4,6 @@ import edu.uph.learn.maharadja.map.Region;
 import edu.uph.learn.maharadja.player.Player;
 
 public record RegionForfeitedEvent(Region region,
-                                   Player player) implements Event{
+                                   Player attacker,
+                                   Player previousRegent) implements Event{
 }

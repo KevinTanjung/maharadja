@@ -5,13 +5,14 @@ import edu.uph.learn.maharadja.common.UI;
 import edu.uph.learn.maharadja.game.GameEngine;
 import edu.uph.learn.maharadja.ui.TextResource;
 import edu.uph.learn.maharadja.ui.factory.ButtonFactory;
+import edu.uph.learn.maharadja.ui.state.TileSelectionState;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 
 public abstract class EndableActionForm extends BaseActionForm {
-  private final Button submitButton;
-  private final Button endButton;
+  protected final Button submitButton;
+  protected final Button endButton;
 
   public EndableActionForm() {
     super();
@@ -23,6 +24,7 @@ public abstract class EndableActionForm extends BaseActionForm {
         Color.IVORY_WHITE,
         getSubmitButtonColor()
     );
+    submitButton.disableProperty().bind(TileSelectionState.get().selectedTargetProperty().isNull());
     submitButton.setOnAction(getSubmitButtonListener());
     endButton = ButtonFactory.create(
         TextResource.END_ACTION,

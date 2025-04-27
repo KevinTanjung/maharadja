@@ -321,8 +321,9 @@ public class GameEngine {
             .filter(regent -> !Objects.equals(regent, player))
             .isPresent()
     ) {
+      Player previousRegent = destination.getRegion().getOwner();
       destination.getRegion().setOwner(null);
-      EventBus.emit(new RegionForfeitedEvent(destination.getRegion(), player));
+      EventBus.emit(new RegionForfeitedEvent(destination.getRegion(), player, previousRegent));
     }
   }
 
@@ -414,10 +415,15 @@ public class GameEngine {
   }
 
   private void checkWinningCondition(Player player) {
-    // TODO impl
-    if (true) {
+    // TODO for now winning two regions means auto-win
+    long ownedRegionCount = gameMap.getAllRegions()
+        .stream()
+        .filter(region -> Objects.equals(player, region.getOwner()))
+        .count();
+    if (ownedRegionCount < 2) {
       return;
     }
+
     if (GameState.get().me().equals(player)) {
       onGameResult.accept(new GameResult(player, true));
     }

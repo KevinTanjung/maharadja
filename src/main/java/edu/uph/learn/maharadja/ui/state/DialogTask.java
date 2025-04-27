@@ -10,6 +10,10 @@ public record DialogTask(String title,
                          Optional<List<Node>> contents,
                          Runnable callback,
                          Optional<Integer> autoDismissSeconds) {
+  public DialogTask(String title) {
+    this(title, Optional.empty(), Optional.empty(), () -> {}, Optional.of(3));
+  }
+
   public DialogTask(String title,
                     String message,
                     Runnable callback) {

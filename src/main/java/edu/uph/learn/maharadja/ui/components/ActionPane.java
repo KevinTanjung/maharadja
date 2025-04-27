@@ -2,9 +2,11 @@ package edu.uph.learn.maharadja.ui.components;
 
 import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.common.UI;
+import edu.uph.learn.maharadja.event.BotActionEvent;
 import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.TurnPhase;
 import edu.uph.learn.maharadja.game.event.GamePhaseEvent;
+import edu.uph.learn.maharadja.player.Bot;
 import edu.uph.learn.maharadja.ui.TextResource;
 import edu.uph.learn.maharadja.ui.factory.LabelFactory;
 import edu.uph.learn.maharadja.ui.form.AttackTerritoryForm;
@@ -49,6 +51,11 @@ public class ActionPane extends BorderPane {
     attackTerritoryForm.setVisible(false);
     fortifyTerritoryForm.setVisible(false);
 
+    if (gamePhaseEvent.currentPlayer() instanceof Bot) {
+      setCenter(new Label("Bot is thinking..."));
+      return;
+    }
+
     if (gamePhaseEvent.phase() == TurnPhase.DRAFT) {
       renderDraftAction();
     } else if (gamePhaseEvent.phase() == TurnPhase.ATTACK) {
@@ -60,7 +67,7 @@ public class ActionPane extends BorderPane {
 
   @SneakyThrows
   private void resetPane() {
-    setTop(new Label("Loading..."));
+    setTop(null);
     setCenter(null);
     setBottom(null);
     Thread.sleep(250);
