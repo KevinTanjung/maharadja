@@ -1,17 +1,16 @@
 package edu.uph.learn.maharadja.ui;
 
-import edu.uph.learn.maharadja.game.GameEngine;
+import edu.uph.learn.maharadja.game.GameResult;
 import edu.uph.learn.maharadja.game.GameState;
 import edu.uph.learn.maharadja.game.Player;
-import edu.uph.learn.maharadja.map.Territory;
+import edu.uph.learn.maharadja.ui.scene.DefeatScene;
+import edu.uph.learn.maharadja.ui.scene.VictoryScene;
 import edu.uph.learn.maharadja.ui.scene.GameScene;
 import edu.uph.learn.maharadja.ui.scene.LobbyScene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * Main class that manage the transition between JavaFX scene.
@@ -30,14 +29,16 @@ public class GameWindow {
 
     // Debugging
     // -- skip lobby
-    registerPlayer("GajahMada", true);
+    //registerPlayer("GajahMada", true);
     // -- auto draft
-    Player currentPlayer = GameState.get().currentTurn();
-    Territory territory = currentPlayer.getTerritories().iterator().next();
-    int numOfTroops = Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(),  3));
-    GameEngine.get().draftTroop(Map.of(territory, numOfTroops));
+    //Player currentPlayer = GameState.get().currentTurn();
+    //Territory territory = currentPlayer.getTerritories().iterator().next();
+    //int numOfTroops = Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(),  3));
+    //GameEngine.get().draftTroop(Map.of(territory, numOfTroops));
     // -- skip attack
     //GameEngine.get().nextPhase();
+    // -- go to final state
+    //openEndScene(new GameResult(Player.user("GajahMada"), true));
   }
 
   public void openLobby() {
@@ -58,6 +59,15 @@ public class GameWindow {
     // TODO: transition to server/client scene
     LOG.info("Loading the game up...");
     stage.setScene(new GameScene(this));
+    stage.show();
+  }
+
+  public void openEndScene(GameResult gameResult) {
+    if (gameResult.victory()) {
+      stage.setScene(new VictoryScene(this));
+    } else {
+      stage.setScene(new DefeatScene(this));
+    }
     stage.show();
   }
 }

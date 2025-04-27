@@ -1,7 +1,7 @@
 package edu.uph.learn.maharadja.ui.scene;
 
 import edu.uph.learn.maharadja.common.Color;
-import edu.uph.learn.maharadja.common.Constant;
+import edu.uph.learn.maharadja.common.UI;
 import edu.uph.learn.maharadja.game.GameEngine;
 import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.GameMapLoader;
@@ -18,7 +18,7 @@ public class GameScene extends Scene {
   private final GameEngine gameEngine;
 
   public GameScene(GameWindow gameWindow) {
-    super(new HBox(), Constant.DEFAULT_WIDTH, Constant.DEFAULT_HEIGHT);
+    super(new HBox(), UI.WIDTH, UI.HEIGHT);
     this.gameWindow = gameWindow;
     setFill(Color.IVORY_WHITE.get());
 
@@ -30,5 +30,6 @@ public class GameScene extends Scene {
 
     // ensure GameEngine is initialized last after all components register the listener to EventBus
     this.gameEngine = GameEngine.init(gameMap);
+    gameEngine.setOnGameResult(gameWindow::openEndScene);
   }
 }

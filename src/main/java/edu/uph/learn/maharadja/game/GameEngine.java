@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static edu.uph.learn.maharadja.game.event.SkipPhaseEvent.SkipReason.NO_DEPLOYABLE_TROOP;
@@ -38,6 +39,7 @@ public class GameEngine {
   private static final Logger LOG = LoggerFactory.getLogger(GameEngine.class);
   private final GameMap gameMap;
   private final GameState gameState;
+  private Consumer<GameResult> onGameResult = gameResult -> {};
 
   //region Singleton
   GameEngine(GameMap gameMap) {
@@ -144,7 +146,7 @@ public class GameEngine {
     switch (nextPhase) {
       case START -> {
         checkLosingCondition(currentPlayer);
-        checkWinningCondition();
+        checkWinningCondition(currentPlayer);
         nextTurn();
         nextPhase();
       }
@@ -348,8 +350,14 @@ public class GameEngine {
     return fortifiableTerritories;
   }
 
-  private void checkWinningCondition() {
+  private void checkWinningCondition(Player player) {
     // TODO impl
+    if (true) {
+      return;
+    }
+    if (GameState.get().me().equals(player)) {
+      onGameResult.accept(new GameResult(player, true));
+    }
   }
 
   private void checkLosingCondition(Player player) {
@@ -360,6 +368,13 @@ public class GameEngine {
     if (player.getTerritories().isEmpty()) {
       player.setForfeited(true);
       EventBus.emit(new PlayerForfeitEvent(player));
+      if (GameState.get().me().equals(player)) {
+        onGameResult.accept(new GameResult(player, false));
+      }
     }
+  }
+
+  public void setOnGameResult(Consumer<GameResult> onGameResult) {
+    this.onGameResult = onGameResult;
   }
 }

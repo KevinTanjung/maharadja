@@ -16,5 +16,11 @@ public class TextResource {
   public static final String FORTIFY_NUM_OF_TROOPS_LABEL = "# of Moved Troops:";
   public static final String END_ACTION = "NEXT PHASE";
 
+  public static final String HOST_BUTTON = "HOST";
+  public static final String JOIN_BUTTON = "JOIN";
+  public static final String LOBBY_BUTTON = "LOBBY";
+  public static final String EXIT_BUTTON = "EXIT";
+  public static final String USERNAME_FIELD = "USERNAME";
+
   private TextResource() {}
 }

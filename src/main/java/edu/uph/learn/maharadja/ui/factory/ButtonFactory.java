@@ -1,12 +1,11 @@
 package edu.uph.learn.maharadja.ui.factory;
 
 import edu.uph.learn.maharadja.common.Color;
+import edu.uph.learn.maharadja.common.UI;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Background;
-import javafx.scene.paint.Paint;
 
-import static edu.uph.learn.maharadja.common.Constant.HEIGHT_NORMAL;
 import static edu.uph.learn.maharadja.common.UI.SMALL_FONT;
 
 public class ButtonFactory {
@@ -21,12 +20,11 @@ public class ButtonFactory {
     Button button = new Button(label);
     button.setStyle("-fx-text-fill: " + text.toHex());
     button.setFont(SMALL_FONT);
-    button.setMinHeight(HEIGHT_NORMAL);
-    button.setPrefHeight(HEIGHT_NORMAL);
+    button.setMinHeight(UI.EXTRA_LARGE);
+    button.setPrefHeight(UI.EXTRA_LARGE);
     button.setMinWidth(width);
     button.setPrefWidth(width);
     button.setBackground(Background.fill(background.get()));
-    button.setBorder(BorderFactory.color(background));
     addHoverEffect(button);
     return button;
   }
@@ -45,7 +43,6 @@ public class ButtonFactory {
     button.setPrefHeight(width);
     button.setMaxHeight(width);
     button.setBackground(Background.fill(background.get()));
-    button.setBorder(BorderFactory.color(background));
     addHoverEffect(button);
     return button;
   }

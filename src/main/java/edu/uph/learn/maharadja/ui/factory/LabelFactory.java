@@ -23,7 +23,7 @@ public class LabelFactory {
   }
 
   public static Label troopLabel() {
-    double size = UI.LARGE;
+    double size = UI.EXTRA_LARGE;
     Label label = new Label();
     label.setStyle(troopLabelStyle(Color.VOLCANIC_BLACK, Color.IVORY_WHITE));
     label.setFont(UI.SMALL_FONT);
@@ -41,9 +41,9 @@ public class LabelFactory {
 
   public static String troopLabelStyle(Color backgroundColor, Color textColor) {
     return "-fx-background-color: " + backgroundColor.toHex() + "; "
-        + "-fx-background-radius: " + ((int) UI.LARGE) + "px;"
+        + "-fx-background-radius: " + ((int) UI.EXTRA_LARGE) + "px;"
         + "-fx-border-color: " + backgroundColor.toHex() + "; "
-        + "-fx-border-radius: " + ((int) UI.LARGE) + "px;"
+        + "-fx-border-radius: " + ((int) UI.EXTRA_LARGE) + "px;"
         + "-fx-font-weight: bold;"
         + "-fx-text-fill: " + textColor.toHex() + ";"
         + "-fx-alignment: center;";

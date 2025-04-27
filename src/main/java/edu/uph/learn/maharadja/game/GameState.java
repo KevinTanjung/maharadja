@@ -40,7 +40,15 @@ public class GameState {
   }
 
   public static GameState get() {
+    if (GameStateHolder.INSTANCE == null) {
+      init();
+    }
     return GameStateHolder.INSTANCE;
+  }
+
+  public static void reset() {
+    GameStateHolder.INSTANCE = null;
+    init();
   }
   //endregion
 
