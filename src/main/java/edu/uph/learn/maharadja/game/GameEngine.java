@@ -14,6 +14,7 @@ import edu.uph.learn.maharadja.game.event.TroopMovementEvent;
 import edu.uph.learn.maharadja.map.GameMap;
 import edu.uph.learn.maharadja.map.Region;
 import edu.uph.learn.maharadja.map.Territory;
+import edu.uph.learn.maharadja.player.Bot;
 import edu.uph.learn.maharadja.player.Player;
 import edu.uph.learn.maharadja.common.DiceRoll;
 import edu.uph.learn.maharadja.common.TerritoryUtil;
@@ -170,8 +171,8 @@ public class GameEngine {
     // TODO: Troops based on resource
 
     EventBus.emit(new DraftPhaseEvent(currentPlayer, numOfTroops));
-    if (currentPlayer.isComputer()) {
-      // TODO: aiEngine.draftTroops(currentPlayer, numOfTroops);
+    if (currentPlayer instanceof Bot) {
+      draftTroop(((Bot) currentPlayer).decideTroopDraft(numOfTroops));
     }
   }
 
