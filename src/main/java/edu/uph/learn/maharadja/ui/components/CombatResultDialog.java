@@ -13,6 +13,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -54,7 +55,6 @@ public class CombatResultDialog extends Popup {
     boolean attackerWon = combatResult.attackerLost() < combatResult.defenderLost();
     Color backgroundColor = Color.IVORY_WHITE;
     Color headingColor = attackerWon ? Color.IMPERIAL_GOLD : Color.SUNSET_RED;
-    Color textColor = Color.VOLCANIC_BLACK;
 
     vBox = new VBox(UI.MEDIUM);
     vBox.setBorder(new Border(new BorderStroke(headingColor.get(), BorderStrokeStyle.SOLID, new CornerRadii(UI.UNIT), new BorderWidths(UI.SMALL))));
@@ -104,7 +104,7 @@ public class CombatResultDialog extends Popup {
       if (i >= rollResult.attackerRoll().size()) {
         defenderRolls.getLast().getChildren().add(createDice(rollResult.defenderRoll().get(i), false));
       } else if (i >= rollResult.defenderRoll().size()) {
-        defenderRolls.getLast().getChildren().add(createDice(rollResult.attackerRoll().get(i), false));
+        attackerRolls.getLast().getChildren().add(createDice(rollResult.attackerRoll().get(i), false));
       } else {
         int attacker = rollResult.attackerRoll().get(i);
         int defender = rollResult.defenderRoll().get(i);
@@ -144,6 +144,8 @@ public class CombatResultDialog extends Popup {
     Label additionalLabel = new Label();
     additionalLabel.setMaxWidth(UI.FORM_WIDTH - UI.EXTRA_LARGE);
     additionalLabel.setWrapText(true);
+    additionalLabel.setContentDisplay(ContentDisplay.CENTER);
+    additionalLabel.setAlignment(Pos.CENTER);
     additionalLabel.setTextAlignment(TextAlignment.CENTER);
     additionalLabel.setFont(UI.SMALL_FONT);
     additionalLabel.setStyle("-fx-text-fill: " + Color.VOLCANIC_BLACK.toHex() + "; -fx-text-alignment: center;");
