@@ -1,26 +1,31 @@
 package edu.uph.learn.maharadja.ui.state;
 
-import javafx.scene.Node;
+import edu.uph.learn.maharadja.common.Color;
+import edu.uph.learn.maharadja.ui.event.CombatResultEvent;
 
-import java.util.List;
 import java.util.Optional;
 
 public record DialogTask(String title,
-                         Optional<String> message,
-                         Optional<List<Node>> contents,
+                         Optional<Object> data,
                          Runnable callback,
-                         Optional<Integer> autoDismissSeconds) {
+                         Optional<Integer> autoDismissSeconds,
+                         Optional<Color> backgroundColor,
+                         Optional<Color> textColor) {
   public DialogTask(String title) {
-    this(title, Optional.empty(), Optional.empty(), () -> {}, Optional.of(3));
+    this(title, null, (Color) null);
+  }
+
+  public DialogTask(String title, Color backgroundColor, Color textColor) {
+    this(title, Optional.empty(), () -> {}, Optional.of(3), Optional.ofNullable(backgroundColor), Optional.ofNullable(textColor));
   }
 
   public DialogTask(String title,
                     String message,
                     Runnable callback) {
-    this(title, Optional.of(message), Optional.empty(), callback, Optional.of(2));
+    this(title, Optional.of(message), callback, Optional.of(2), Optional.empty(), Optional.empty());
   }
 
-  public DialogTask(String title, List<Node> contents, Runnable callback) {
-    this(title, Optional.empty(), Optional.of(contents), callback, Optional.of(2));
+  public DialogTask(CombatResultEvent combatResultEvent, Runnable callback) {
+    this("Combat Result", Optional.of(combatResultEvent), callback, Optional.empty(), Optional.empty(), Optional.empty());
   }
 }

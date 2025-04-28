@@ -7,6 +7,7 @@ import edu.uph.learn.maharadja.game.GameResult;
 import edu.uph.learn.maharadja.game.GameState;
 import edu.uph.learn.maharadja.map.Territory;
 import edu.uph.learn.maharadja.player.Player;
+import edu.uph.learn.maharadja.ui.event.CombatResultEvent;
 import edu.uph.learn.maharadja.ui.scene.DefeatScene;
 import edu.uph.learn.maharadja.ui.scene.VictoryScene;
 import edu.uph.learn.maharadja.ui.scene.GameScene;
@@ -41,17 +42,18 @@ public class GameWindow {
 
     dialogState = DialogState.init(stage);
     EventBus.registerListener(BotActionEvent.class, dialogState::onBotActionEvent);
+    EventBus.registerListener(CombatResultEvent.class, dialogState::onCombatResultEvent);
     loadingState = LoadingState.get();
     tileSelectionState = TileSelectionState.get();
 
     //// Debugging
     //// -- skip lobby
-    //registerPlayer("GajahMada", true);
+    registerPlayer("GajahMada", true);
     //// -- auto draft
-    //Player currentPlayer = GameState.get().currentTurn();
-    //Territory territory = currentPlayer.getTerritories().iterator().next();
-    //int numOfTroops = Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(),  3));
-    //GameEngine.get().draftTroop(Map.of(territory, numOfTroops));
+    Player currentPlayer = GameState.get().currentTurn();
+    Territory territory = currentPlayer.getTerritories().iterator().next();
+    int numOfTroops = Math.max(3, Math.floorDiv(currentPlayer.getTerritories().size(),  3));
+    GameEngine.get().draftTroop(Map.of(territory, numOfTroops));
     //// -- skip attack
     //GameEngine.get().nextPhase();
     //// -- skip fortify

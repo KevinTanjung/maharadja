@@ -129,7 +129,6 @@ public class AttackTerritoryForm extends EndableActionForm {
       Territory source = sourceTerritory.get();
       Territory target = targetTerritory.get();
       CombatResult result = GameEngine.get().performCombat(source, target, numOfTroops.get());
-      // TODO: Display Result
       EventBus.emit(new CombatResultEvent(source, target, result));
       GameEngine.get().prepareTerritoryAttack(GameState.get().currentTurn());
     };

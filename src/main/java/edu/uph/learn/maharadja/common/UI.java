@@ -3,6 +3,7 @@ package edu.uph.learn.maharadja.common;
 import javafx.scene.text.Font;
 
 public class UI {
+
   private UI() {}
 
   public static final double UNIT = 8;
@@ -24,4 +25,5 @@ public class UI {
 
   public static final Font SMALL_FONT = new Font("Verdana Bold", 12);
   public static final Font LARGE_FONT = new Font("Verdana Bold", 16);
+  public static final Font EXTRA_LARGE_FONT = new Font("Verdana Bold", 32);
 }

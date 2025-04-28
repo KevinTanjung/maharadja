@@ -55,9 +55,9 @@ public class GameDialog extends Popup {
   @Override
   public void show(Window window) {
     Scene scene = window.getScene();
+    super.show(window);
     setX(window.getX() + scene.getWidth() / 2 - root.getWidth() / 2);
     setY(window.getY() + scene.getHeight() - 100);
     sequence.play();
-    super.show(window);
   }
 }

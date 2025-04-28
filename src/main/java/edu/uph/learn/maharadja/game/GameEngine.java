@@ -240,6 +240,8 @@ public class GameEngine {
                   TurnPhase.ATTACK,
                   currentPlayer,
                   Optional.of(result),
+                  Optional.of(decision.from()),
+                  Optional.of(decision.to()),
                   () -> prepareTerritoryAttack(GameState.get().currentTurn())
               ));
             } else {
@@ -378,13 +380,14 @@ public class GameEngine {
       Player defendingPlayer = defender.getOwner();
       occupyTerritory(attacker, defender, attackingTroops - attackerLost);
       checkLosingCondition(defendingPlayer);
-      return new CombatResult(attackerLost, defenderLost, CombatResult.Result.OCCUPIED);
+      return new CombatResult(attackerLost, defenderLost, CombatResult.Result.OCCUPIED, rollResult);
     }
 
     return new CombatResult(
         attackerLost,
         defenderLost,
-        attacker.getNumberOfStationedTroops() == 1 ? CombatResult.Result.ADVANCE : CombatResult.Result.FORFEIT
+        attacker.getNumberOfStationedTroops() == 1 ? CombatResult.Result.ADVANCE : CombatResult.Result.FORFEIT,
+        rollResult
     );
   }
 

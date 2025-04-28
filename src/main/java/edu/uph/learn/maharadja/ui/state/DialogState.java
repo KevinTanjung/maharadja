@@ -1,7 +1,10 @@
 package edu.uph.learn.maharadja.ui.state;
 
 import edu.uph.learn.maharadja.event.BotActionEvent;
+import edu.uph.learn.maharadja.ui.components.CombatResultDialog;
 import edu.uph.learn.maharadja.ui.components.GameDialog;
+import edu.uph.learn.maharadja.ui.event.CombatResultEvent;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +17,7 @@ public class DialogState {
 
   private final Queue<DialogTask> dialogQueue = new LinkedList<>();
   private final Stage stage;
-  private volatile GameDialog activeDialog;
+  private volatile Popup activeDialog;
 
   public void enqueue(DialogTask task) {
     LOG.info("Enqueuing DialogTask: {}", task.title());
@@ -35,20 +38,38 @@ public class DialogState {
 
   private void showDialog(DialogTask task) {
     synchronized (this) {
-      activeDialog = new GameDialog(task, () -> {
-        activeDialog = null;
-        tryProcessNextDialog();
-      });
+      if (task.data().isPresent() && task.data().get() instanceof CombatResultEvent) {
+        activeDialog = new CombatResultDialog(task, () -> {
+          activeDialog = null;
+          tryProcessNextDialog();
+        });
+      } else {
+        activeDialog = new GameDialog(task, () -> {
+          activeDialog = null;
+          tryProcessNextDialog();
+        });
+      }
       activeDialog.show(stage);
     }
   }
 
   public void onBotActionEvent(BotActionEvent event) {
-    enqueue(new DialogTask(
-        String.format("%s %s", event.currentPlayer().getUsername(), event.currentPhase()),
-        "Deciding...",
-        event.callback()
-    ));
+    if (event.combatResult().isEmpty() || event.from().isEmpty() || event.to().isEmpty()) {
+      enqueue(new DialogTask(
+          String.format("%s %s", event.currentPlayer().getUsername(), event.currentPhase()),
+          "Deciding...",
+          event.callback()
+      ));
+    } else {
+      showDialog(new DialogTask(
+          new CombatResultEvent(event.from().get(), event.to().get(), event.combatResult().get()),
+          event.callback()
+      ));
+    }
+  }
+
+  public void onCombatResultEvent(CombatResultEvent combatResultEvent) {
+    showDialog(new DialogTask(combatResultEvent, () -> {}));
   }
 
   //region Singleton
