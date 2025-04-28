@@ -109,17 +109,19 @@ public class DraftTroopForm extends BaseActionForm {
 
       //region Region Label
       Region region = entry.getKey();
+      Label regionLabel = new Label(region.getName());
+      regionLabel.setFont(UI.LARGE_FONT);
+      regionLabel.setAlignment(Pos.CENTER);
+      regionLabel.setTextAlignment(TextAlignment.CENTER);
       TextFlow textFlow = LabelFactory.createTextFlow(
-          new Pair<>(region.getName(), true),
-          new Pair<>("\n(Owned Territory: ", false),
+          new Pair<>("(Owned Territory: ", false),
           new Pair<>(String.valueOf(entry.getValue().size()), true),
           new Pair<>(", Troop: ", false),
           new Pair<>(String.valueOf(regionToTroop.get(region)), true),
           new Pair<>(")", false)
       );
-      ((Text) textFlow.getChildren().getFirst()).setFont(UI.LARGE_FONT);
       textFlow.setTextAlignment(TextAlignment.CENTER);
-      regionVBox.getChildren().add(textFlow);
+      regionVBox.getChildren().addAll(regionLabel, textFlow);
       entry.getValue().sort(Comparator.comparingInt(Territory::getNumberOfStationedTroops).reversed());
       //endregion
 
@@ -140,9 +142,7 @@ public class DraftTroopForm extends BaseActionForm {
 
         // Container
         VBox territoryVBox = new VBox();
-        //UIUtil.debug(territoryVBox, "aqua");
-        territoryVBox.setMinWidth(getWidth() / 2);
-        //territoryVBox.setMaxWidth(getWidth() / 2);
+        territoryVBox.setMinWidth(getWidth() / 2 - UI.UNIT);
         territoryVBox.setPadding(new Insets(0, UI.SMALL, 0, UI.SMALL));
         HBox.setHgrow(territoryVBox, Priority.ALWAYS);
         regionHbox.getChildren().add(territoryVBox);
@@ -152,7 +152,7 @@ public class DraftTroopForm extends BaseActionForm {
         firstRow.setAlignment(Pos.CENTER);
         territoryVBox.getChildren().add(firstRow);
         Label territoryNameLabel = new Label(territory.getName());
-        territoryNameLabel.setMinWidth(getMinWidth() / 2);
+        territoryNameLabel.setMinWidth(getMinWidth() / 2 - UI.UNIT);
         territoryNameLabel.setMaxWidth(Double.MAX_VALUE);
         territoryNameLabel.setTextAlignment(TextAlignment.CENTER);
         territoryNameLabel.setContentDisplay(ContentDisplay.CENTER);
@@ -213,7 +213,7 @@ public class DraftTroopForm extends BaseActionForm {
         HBox firstRow = new HBox();
         fakeBox.getChildren().add(firstRow);
         Label territoryNameLabel = new Label("foo");
-        territoryNameLabel.setMinWidth(getMinWidth() / 2);
+        territoryNameLabel.setMinWidth(getMinWidth() / 2 - UI.UNIT);
         territoryNameLabel.setMaxWidth(Double.MAX_VALUE);
         territoryNameLabel.setTextAlignment(TextAlignment.CENTER);
         territoryNameLabel.setContentDisplay(ContentDisplay.CENTER);

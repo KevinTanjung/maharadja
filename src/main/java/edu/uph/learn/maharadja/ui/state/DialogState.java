@@ -63,7 +63,8 @@ public class DialogState {
     } else {
       showDialog(new DialogTask(
           new CombatResultEvent(event.from().get(), event.to().get(), event.combatResult().get()),
-          event.callback()
+          event.callback(),
+          2 // make bot decision dismiss faster
       ));
     }
   }

@@ -28,4 +28,8 @@ public record DialogTask(String title,
   public DialogTask(CombatResultEvent combatResultEvent, Runnable callback) {
     this("Combat Result", Optional.of(combatResultEvent), callback, Optional.empty(), Optional.empty(), Optional.empty());
   }
+
+  public DialogTask(CombatResultEvent combatResultEvent, Runnable callback, int autoDismissSeconds) {
+    this("Combat Result", Optional.of(combatResultEvent), callback, Optional.empty(), Optional.empty(), Optional.empty());
+  }
 }

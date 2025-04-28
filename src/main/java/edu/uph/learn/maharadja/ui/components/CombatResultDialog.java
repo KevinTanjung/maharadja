@@ -122,18 +122,16 @@ public class CombatResultDialog extends Popup {
     setAutoHide(true);
     setHideOnEscape(true);
 
-    FadeTransition fadeIn = new FadeTransition(Duration.millis(500), vBox);
+    FadeTransition fadeIn = new FadeTransition(Duration.millis(250), vBox);
     fadeIn.setFromValue(0);
     fadeIn.setToValue(1);
     PauseTransition stayOn = new PauseTransition(Duration.seconds(task.autoDismissSeconds().orElse(5)));
-    FadeTransition fadeOut = new FadeTransition(Duration.millis(500), vBox);
+    FadeTransition fadeOut = new FadeTransition(Duration.millis(250), vBox);
     fadeOut.setFromValue(1);
     fadeOut.setToValue(0);
 
-    fadeIn.setOnFinished(e -> {
-      task.callback().run();
-    });
     fadeOut.setOnFinished(e -> {
+      task.callback().run();
       hide();
       dialogStateCallback.run();
     });
@@ -153,7 +151,7 @@ public class CombatResultDialog extends Popup {
 
     switch (combatResult.result()) {
       case TERRITORY_OCCUPIED -> additionalLabel.setText(
-          String.format("Player [%s] conquered the territory [%s, %s] from %s.",
+          String.format("Player [%s] conquered the territory\n[%s, %s]\nfrom [%s].",
               combatResult.attacker().getUsername(),
               combatResultEvent.defender().getName(),
               combatResultEvent.defender().getRegion().getName(),
@@ -161,14 +159,14 @@ public class CombatResultDialog extends Popup {
           )
       );
       case REGION_OCCUPIED -> additionalLabel.setText(
-          String.format("Splendid! Player [%s] conquered the region [%s]!\nBonus Troops: [%d]",
+          String.format("Splendid!\nPlayer [%s] conquered the region [%s]!\nBonus Troops: [%d]",
               combatResult.attacker().getUsername(),
               combatResultEvent.defender().getRegion().getName(),
               combatResultEvent.defender().getRegion().getBonusTroops()
           )
       );
       case REGION_FORFEITED -> additionalLabel.setText(
-          String.format("Player [%s] conquered the territory [%s, %s] from %s.\nPlayer [%s] lost control of the region [%s]",
+          String.format("Player [%s] conquered the territory\n[%s, %s]\nfrom %s.\nPlayer [%s] lost control of the region [%s]",
               combatResult.attacker().getUsername(),
               combatResultEvent.defender().getName(),
               combatResultEvent.defender().getRegion(),
@@ -179,9 +177,9 @@ public class CombatResultDialog extends Popup {
       );
       case ADVANCE -> additionalLabel.setText("You still have some troops, try again!");
       case FORFEIT -> additionalLabel.setText(
-          String.format("You only have one troop left in [%s, %s]!\nChoose another tile!!",
+          String.format("You only have one troop left in\n[%s, %s]!\nChoose another tile!!",
               combatResultEvent.attacker().getName(),
-              combatResultEvent.attacker().getRegion()
+              combatResultEvent.attacker().getRegion().getName()
           ));
     }
     return additionalLabel;
