@@ -154,12 +154,17 @@ public class GameEngine {
     switch (nextPhase) {
       case START -> {
         checkLosingCondition(currentPlayer);
-        checkWinningCondition(currentPlayer);
+        boolean won = checkWinningCondition(currentPlayer);
+        if (won) break;
         nextTurn();
         nextPhase();
       }
       case DRAFT -> prepareTroopsDraft(currentPlayer);
-      case ATTACK -> prepareTerritoryAttack(currentPlayer);
+      case ATTACK -> {
+        boolean won = checkWinningCondition(currentPlayer);
+        if (won) break;
+        prepareTerritoryAttack(currentPlayer);
+      }
       case FORTIFY -> prepareTerritoryFortification(currentPlayer);
     }
   }
@@ -417,19 +422,20 @@ public class GameEngine {
     return fortifiableTerritories;
   }
 
-  private void checkWinningCondition(Player player) {
+  private boolean checkWinningCondition(Player player) {
     // TODO for now winning two regions means auto-win
     long ownedRegionCount = gameMap.getAllRegions()
         .stream()
         .filter(region -> Objects.equals(player, region.getOwner()))
         .count();
     if (ownedRegionCount < 2) {
-      return;
+      return false;
     }
 
     if (GameState.get().me().equals(player)) {
       onGameResult.accept(new GameResult(player, true));
     }
+    return true;
   }
 
   private void checkLosingCondition(Player player) {
