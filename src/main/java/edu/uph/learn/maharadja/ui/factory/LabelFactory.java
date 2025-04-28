@@ -6,6 +6,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+import javafx.util.Pair;
 
 public class LabelFactory {
   public static Label create(String content,
@@ -47,6 +50,23 @@ public class LabelFactory {
         + "-fx-font-weight: bold;"
         + "-fx-text-fill: " + textColor.toHex() + ";"
         + "-fx-alignment: center;";
+  }
+
+  @SafeVarargs
+  public static TextFlow createTextFlow(Pair<String, Boolean>... texts) {
+    TextFlow textFlow = new TextFlow();
+    for (Pair<String, Boolean> text : texts) {
+      textFlow.getChildren().add(createText(text.getKey(), text.getValue()));
+    }
+    return textFlow;
+  }
+
+  public static Text createText(String content, boolean bold) {
+    Text text = new Text(content);
+    if (bold) {
+      text.setStyle("-fx-font-weight: bold;");
+    }
+    return text;
   }
 
   private LabelFactory() {

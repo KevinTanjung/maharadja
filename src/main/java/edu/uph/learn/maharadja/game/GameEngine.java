@@ -286,15 +286,15 @@ public class GameEngine {
     }
   }
 
-  public void occupyTerritory(Territory territory, int playerIdx, int movedTroop) {
-    occupyTerritory(territory, gameState.getPlayerList().get(playerIdx), movedTroop, null);
+  public CombatResult.Result occupyTerritory(Territory territory, int playerIdx, int movedTroop) {
+    return occupyTerritory(territory, gameState.getPlayerList().get(playerIdx), movedTroop, null);
   }
 
-  public void occupyTerritory(Territory source, Territory destination, int movedTroop) {
-    occupyTerritory(destination, source.getOwner(), movedTroop, source);
+  public CombatResult.Result occupyTerritory(Territory source, Territory destination, int movedTroop) {
+    return occupyTerritory(destination, source.getOwner(), movedTroop, source);
   }
 
-  private void occupyTerritory(Territory destination, Player player, int movedTroop, Territory source) {
+  private CombatResult.Result occupyTerritory(Territory destination, Player player, int movedTroop, Territory source) {
     if (source != null && destination.getOwner() != null) {
       destination.getOwner().removeTerritory(destination);
     }
@@ -323,6 +323,7 @@ public class GameEngine {
     if (regionWon) {
       destination.getRegion().setOwner(player);
       EventBus.emit(new RegionOccupiedEvent(destination.getRegion(), player));
+      return CombatResult.Result.REGION_OCCUPIED;
     } else if (
         Optional.ofNullable(destination.getRegion().getOwner())
             .filter(regent -> !Objects.equals(regent, player))
@@ -331,7 +332,9 @@ public class GameEngine {
       Player previousRegent = destination.getRegion().getOwner();
       destination.getRegion().setOwner(null);
       EventBus.emit(new RegionForfeitedEvent(destination.getRegion(), player, previousRegent));
+      return CombatResult.Result.REGION_FORFEITED;
     }
+    return CombatResult.Result.TERRITORY_OCCUPIED;
   }
 
   public List<Territory> getAdjacentTerritories(Territory origin) {
@@ -383,16 +386,18 @@ public class GameEngine {
 
     if (defender.getNumberOfStationedTroops() == 0) {
       Player defendingPlayer = defender.getOwner();
-      occupyTerritory(attacker, defender, attackingTroops - attackerLost);
+      CombatResult.Result result = occupyTerritory(attacker, defender, attackingTroops - attackerLost);
       checkLosingCondition(defendingPlayer);
-      return new CombatResult(attackerLost, defenderLost, CombatResult.Result.OCCUPIED, rollResult);
+      return new CombatResult(attackerLost, defenderLost, result, rollResult, attacker.getOwner(), defendingPlayer);
     }
 
     return new CombatResult(
         attackerLost,
         defenderLost,
-        attacker.getNumberOfStationedTroops() == 1 ? CombatResult.Result.ADVANCE : CombatResult.Result.FORFEIT,
-        rollResult
+        attacker.getNumberOfStationedTroops() == 1 ? CombatResult.Result.FORFEIT : CombatResult.Result.ADVANCE,
+        rollResult,
+        attacker.getOwner(),
+        defender.getOwner()
     );
   }
 

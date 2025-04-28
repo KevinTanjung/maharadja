@@ -6,6 +6,7 @@ import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Background;
 
+import static edu.uph.learn.maharadja.common.UI.LARGE_FONT;
 import static edu.uph.learn.maharadja.common.UI.SMALL_FONT;
 
 public class ButtonFactory {
@@ -35,7 +36,7 @@ public class ButtonFactory {
                               Color background) {
     Button button = new Button(label);
     button.setStyle("-fx-text-fill: " + text.toHex());
-    button.setFont(SMALL_FONT);
+    button.setFont(LARGE_FONT);
     button.setMinHeight(width);
     button.setPrefHeight(width);
     button.setMaxHeight(width);

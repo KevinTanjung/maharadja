@@ -16,7 +16,7 @@ public class UI {
   public static final double HEIGHT = 720;
   public static final double FORM_WIDTH = 420;
   public static final double TAB_WIDTH = WIDTH / 4;
-  public static final double ACTION_PANE_HEIGHT = HEIGHT / 3;
+  public static final double ACTION_PANE_HEIGHT = HEIGHT / 2;
 
   public static final double MIN_SCALE = 1;
   public static final double MAX_SCALE = 2;

@@ -3,7 +3,6 @@ package edu.uph.learn.maharadja.ui.components;
 import edu.uph.learn.maharadja.common.Color;
 import edu.uph.learn.maharadja.common.DiceRoll.RollResult;
 import edu.uph.learn.maharadja.common.UI;
-import edu.uph.learn.maharadja.common.UIUtil;
 import edu.uph.learn.maharadja.game.CombatResult;
 import edu.uph.learn.maharadja.ui.event.CombatResultEvent;
 import edu.uph.learn.maharadja.ui.state.DialogTask;
@@ -66,13 +65,14 @@ public class CombatResultDialog extends Popup {
     vBox.setBackground(Background.fill(backgroundColor.get()));
     vBox.setAlignment(Pos.CENTER);
 
-    Label resultLabel = new Label(attackerWon ? combatResult.result() == CombatResult.Result.OCCUPIED ? "CONQUERED" : "VICTORY" : "DEFEAT");
+    Label resultLabel = new Label(attackerWon ? (combatResult.result().conquered() ? "CONQUERED" : "VICTORY") : "DEFEAT");
     resultLabel.setMaxWidth(Region.USE_PREF_SIZE);
     resultLabel.setTextAlignment(TextAlignment.CENTER);
     resultLabel.setFont(UI.EXTRA_LARGE_FONT);
     resultLabel.setStyle("-fx-text-fill: " + headingColor.toHex() + "; -fx-text-alignment: center;");
     resultLabel.setPadding(new Insets(UI.MEDIUM, 0, UI.MEDIUM, 0));
     vBox.getChildren().add(resultLabel);
+    vBox.getChildren().add(renderAdditionalLabel(combatResult, combatResultEvent));
 
     HBox hbox = new HBox();
     hbox.setAlignment(Pos.CENTER);
@@ -83,7 +83,7 @@ public class CombatResultDialog extends Popup {
     left.setAlignment(Pos.TOP_CENTER);
     left.getChildren().add(createLabel("ATTACKER", attackerWon ? Color.IMPERIAL_GOLD : Color.SUNSET_RED, UI.LARGE_FONT));
     left.getChildren().add(createLabel(combatResult.attackerLost(), attackerWon ? Color.IMPERIAL_GOLD : Color.SUNSET_RED));
-    VBox right= new VBox();
+    VBox right = new VBox();
     right.setMaxWidth(Double.MAX_VALUE);
     right.setAlignment(Pos.TOP_CENTER);
     right.getChildren().add(createLabel("DEFENDER", attackerWon ? Color.SUNSET_RED : Color.IMPERIAL_GOLD, UI.LARGE_FONT));
@@ -138,6 +138,51 @@ public class CombatResultDialog extends Popup {
       dialogStateCallback.run();
     });
     sequence = new SequentialTransition(fadeIn, stayOn, fadeOut);
+  }
+
+  private static Label renderAdditionalLabel(CombatResult combatResult, CombatResultEvent combatResultEvent) {
+    Label additionalLabel = new Label();
+    additionalLabel.setMaxWidth(UI.FORM_WIDTH - UI.EXTRA_LARGE);
+    additionalLabel.setWrapText(true);
+    additionalLabel.setTextAlignment(TextAlignment.CENTER);
+    additionalLabel.setFont(UI.SMALL_FONT);
+    additionalLabel.setStyle("-fx-text-fill: " + Color.VOLCANIC_BLACK.toHex() + "; -fx-text-alignment: center;");
+    additionalLabel.setPadding(new Insets(UI.UNIT, 0, UI.UNIT, 0));
+
+    switch (combatResult.result()) {
+      case TERRITORY_OCCUPIED -> additionalLabel.setText(
+          String.format("Player [%s] conquered the territory [%s, %s] from %s.",
+              combatResult.attacker().getUsername(),
+              combatResultEvent.defender().getName(),
+              combatResultEvent.defender().getRegion().getName(),
+              combatResult.defender().getUsername()
+          )
+      );
+      case REGION_OCCUPIED -> additionalLabel.setText(
+          String.format("Splendid! Player [%s] conquered the region [%s]!\nBonus Troops: [%d]",
+              combatResult.attacker().getUsername(),
+              combatResultEvent.defender().getRegion().getName(),
+              combatResultEvent.defender().getRegion().getBonusTroops()
+          )
+      );
+      case REGION_FORFEITED -> additionalLabel.setText(
+          String.format("Player [%s] conquered the territory [%s, %s] from %s.\nPlayer [%s] lost control of the region [%s]",
+              combatResult.attacker().getUsername(),
+              combatResultEvent.defender().getName(),
+              combatResultEvent.defender().getRegion(),
+              combatResult.defender().getUsername(),
+              combatResult.defender().getUsername(),
+              combatResultEvent.defender().getRegion().getName()
+          )
+      );
+      case ADVANCE -> additionalLabel.setText("You still have some troops, try again!");
+      case FORFEIT -> additionalLabel.setText(
+          String.format("You only have one troop left in [%s, %s]!\nChoose another tile!!",
+              combatResultEvent.attacker().getName(),
+              combatResultEvent.attacker().getRegion()
+          ));
+    }
+    return additionalLabel;
   }
 
   private static HBox createCenteredHbox() {
