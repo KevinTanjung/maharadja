@@ -2,6 +2,8 @@ package edu.uph.learn.maharadja.map;
 
 import javafx.geometry.Point2D;
 import javafx.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,11 +31,12 @@ public class GameMap {
    *           Water    ----------   Bengkulu      ---------   Jambi
    *           (1,8)                  (2,8)                    (3,8)
    */
-  private static final int[][][] AXIAL_NEIGHBORS = new int[][][] {
+  public static final int[][][] AXIAL_NEIGHBORS = new int[][][] {
       //             East,   North West,  North East,   West,      South West,  South East
       new int[][] { {1, 0},   {-1, -1},    {0, -1},    {-1, 0},     {-1, 1},     {0, 1} },      // Even Row
       new int[][] { {1, 0},   {0, -1},     {1, -1},    {-1, 0},      {0, 1},     {1, 1} },      // Odd Row
   };
+  private static final Logger log = LoggerFactory.getLogger(GameMap.class);
 
   final String tile;
   final int q;
@@ -93,12 +96,14 @@ public class GameMap {
     addTerritory(destination);
     adjacencyList.get(origin).add(destination);
     adjacencyList.get(destination).add(origin);
-    if ("HEX".equals(tile) && !isDirectNeighobrs(origin, destination)) {
-      waterConnections.add(new Pair<>(origin, destination));
+    if ("HEX".equals(tile) && !isDirectNeighbors(origin, destination)) {
+      if (!waterConnections.contains(new Pair<>(destination, origin))) {
+        waterConnections.add(new Pair<>(origin, destination));
+      }
     }
   }
 
-  boolean isDirectNeighobrs(Territory origin, Territory destination) {
+  boolean isDirectNeighbors(Territory origin, Territory destination) {
     int[][] directions = AXIAL_NEIGHBORS[origin.getR() % 2];
     for (int[] direction : directions) {
       if (origin.getQ() + direction[0] == destination.getQ() && origin.getR() + direction[1] == destination.getR()) {
@@ -115,6 +120,10 @@ public class GameMap {
 
   public int getR() {
     return r;
+  }
+
+  public String getTile() {
+    return tile;
   }
 
   public Set<Pair<Territory, Territory>> getWaterConnections() {
@@ -193,6 +202,51 @@ public class GameMap {
       }
     }
 
+    return List.of();
+  }
+
+  /**
+   * Use BFS to traverse the tile and find the shortest water path.
+   */
+  public List<Point2D> getShortestNavalPath(Territory origin, Territory destination) {
+    // The territory is not even adjacent past water
+    if (!adjacencyList.get(origin).contains(destination)) {
+      log.info("Missing connection between {} to {}", origin.getName(), destination.getName());
+      return List.of();
+    }
+
+    Queue<Point2D> queue = new LinkedList<>();
+    Set<Point2D> visited = new HashSet<>();
+    Map<Point2D, Point2D> parentMap = new HashMap<>(); // for backtracking
+
+    queue.add(origin.getPoint());
+    visited.add(origin.getPoint());
+
+    while (!queue.isEmpty()) {
+      Point2D current = queue.poll();
+      if (current.equals(destination.getPoint())) {
+        List<Point2D> path = new ArrayList<>();
+        for (Point2D at = destination.getPoint(); at != null; at = parentMap.get(at)) {
+          path.add(at);
+        }
+        Collections.reverse(path);
+        return Collections.unmodifiableList(path);
+      }
+
+      int[][] directions = AXIAL_NEIGHBORS[(int) (current.getY() % 2)];
+      for (int[] direction : directions) {
+        Point2D next = new Point2D(((int) current.getX() )+ direction[0], ((int) current.getY()) + direction[1]);
+        if (next.getX() < 0 || next.getY() < 0 || next.getX() > q || next.getY() > r) continue; // bound check
+        if (visited.contains(next)) continue;
+        if (territoryMap.get(next) != null
+            && !next.equals(origin.getPoint())
+            && !next.equals(destination.getPoint())
+        ) continue;
+        visited.add(next);
+        queue.add(next);
+        parentMap.put(next, current);
+      }
+    }
     return List.of();
   }
 

@@ -114,10 +114,10 @@ public class GameEngine {
         territory.deployTroop(1);
         troopCount++;
 
-        LOG.info(
-            "Player [{}] deployed [1] troop to territory [{}/{}], now has [{}] troop(s).",
-            player.getUsername(), territory.getName(), territory.getRegion().getName(), territory.getNumberOfStationedTroops()
-        );
+        //LOG.info(
+        //    "Player [{}] deployed [1] troop to territory [{}/{}], now has [{}] troop(s).",
+        //    player.getUsername(), territory.getName(), territory.getRegion().getName(), territory.getNumberOfStationedTroops()
+        //);
 
         EventBus.emit(new TroopMovementEvent(player, gameState.currentPhase(), null, territory));
       }

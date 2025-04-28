@@ -1,5 +1,6 @@
 package edu.uph.learn.maharadja.ui.components;
 
+import edu.uph.learn.maharadja.common.UI;
 import edu.uph.learn.maharadja.common.UIUtil;
 import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.GameState;
@@ -28,17 +29,22 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Polyline;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 
 import static edu.uph.learn.maharadja.common.UI.HEX_SIZE;
@@ -185,14 +191,21 @@ public class MapPane extends ScrollPane {
     for (Pair<Territory, Territory> waterConnection : waterConnections) {
       MapTile from = mapTileGrid.get(waterConnection.getKey().getPoint());
       MapTile to = mapTileGrid.get(waterConnection.getValue().getPoint());
-      Line line = new Line();
-      line.setStartX(from.getTranslateX());
-      line.setStartY(from.getTranslateY());
-      line.setEndX(to.getTranslateX());
-      line.setEndY(to.getTranslateY());
+      Polyline line = new Polyline();
       line.setStrokeWidth(2);
-      line.setStroke(UIUtil.alpha(edu.uph.learn.maharadja.common.Color.VOLCANIC_BLACK, 0.5));
-      line.getStrokeDashArray().addAll(10.0, 5.0);
+      line.setStroke(UIUtil.alpha(edu.uph.learn.maharadja.common.Color.CADET_BLUE, 0.7));
+      line.getStrokeDashArray().addAll(UI.UNIT, UI.UNIT);
+      if ("HEX".equals(gameMap.getTile())) {
+        List<Point2D> paths = gameMap.getShortestNavalPath(from.getTerritory(), to.getTerritory());
+        LOG.info("{} {} paths: {}", from.getTerritory().getName(), to.getTerritory().getName(), paths);
+        for (Point2D point2D : paths) {
+          Optional.ofNullable(mapTileGrid.get(point2D))
+              .ifPresent(tile -> line.getPoints().addAll(tile.getTranslateX(), tile.getTranslateY()));
+        }
+      } else {
+        line.getPoints().addAll(from.getTranslateX(), from.getTranslateY());
+        line.getPoints().addAll(to.getTranslateX(), to.getTranslateY());
+      }
       hexGroup.getChildren().add(line);
       line.toFront();
       from.toFront();

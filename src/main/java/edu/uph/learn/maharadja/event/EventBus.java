@@ -45,7 +45,7 @@ public class EventBus {
         event.getClass(),
         List.of()
     );
-    LOG.info("[{}] Invoking {} listeners", event.getEventName(), listeners.size());
+    //LOG.info("[{}] Invoking {} listeners", event.getEventName(), listeners.size());
 
     for (EventListener<? extends Event> listener : listeners) {
       Runnable task = () -> {
