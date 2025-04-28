@@ -119,6 +119,9 @@ public class MapTile extends Group {
         .map(color -> UIUtil.alpha(color, selected ? 1.0 : (highlighted ? 0.6 : 0.2)))
         .orElseGet(Color.IVORY_WHITE::get);
     hex.setFill(newColor);
+    if (selected || highlighted) {
+      toFront();
+    }
   }
 
   private void renderToolTip() {

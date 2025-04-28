@@ -1,5 +1,6 @@
 package edu.uph.learn.maharadja.ui.components;
 
+import edu.uph.learn.maharadja.common.UIUtil;
 import edu.uph.learn.maharadja.event.EventBus;
 import edu.uph.learn.maharadja.game.GameState;
 import edu.uph.learn.maharadja.game.TurnPhase;
@@ -26,7 +27,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.util.Duration;
+import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +40,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Stack;
+
+import static edu.uph.learn.maharadja.common.UI.HEX_SIZE;
 
 @SuppressWarnings( {"FieldCanBeLocal", "unused", "MismatchedQueryAndUpdateOfCollection"})
 public class MapPane extends ScrollPane {
@@ -51,6 +55,7 @@ public class MapPane extends ScrollPane {
   private final ObjectProperty<Territory> selectedTarget = TileSelectionState.get().selectedTargetProperty();
   private final ObjectProperty<Territory> selectedDetail = TileSelectionState.get().selectedDetailProperty();
   private final EventHandler<? super MouseEvent> onClickMapTile;
+  private final Set<Pair<Territory, Territory>> waterLinkTerritory = new HashSet<>();
 
   public MapPane(GameMap gameMap) {
     super(new Pane(new Group()));
@@ -81,8 +86,13 @@ public class MapPane extends ScrollPane {
     HBox.setHgrow(this, Priority.ALWAYS);
     setPannable(true);
     Pane content = (Pane) getContent();
+    double hexWidth = HEX_SIZE * Math.sqrt(3);
+    double hexHeight = HEX_SIZE * 2;
+    content.setPrefWidth((gameMap.getQ() - 1) * hexWidth);
+    content.setPrefHeight((gameMap.getR() - 1) * (hexHeight * 3 / 4));
     Group hexGroup = (Group) content.getChildren().getFirst();
     populateMapTile(hexGroup, gameMap);
+    populateWaterConnection(hexGroup, gameMap.getWaterConnections());
 
     selectedSource.addListener((obs, oldVal, newVal) -> {
       LOG.info("Selected Source: {} -> {}", printTerritory(oldVal), printTerritory(newVal));
@@ -165,8 +175,28 @@ public class MapPane extends ScrollPane {
         }
         MapTile waterTile = new MapTile(q, r);
         hexGroup.getChildren().add(waterTile);
+        waterTile.toBack();
         mapTileGrid.put(point, waterTile);
       }
+    }
+  }
+
+  private void populateWaterConnection(Group hexGroup, Set<Pair<Territory, Territory>> waterConnections) {
+    for (Pair<Territory, Territory> waterConnection : waterConnections) {
+      MapTile from = mapTileGrid.get(waterConnection.getKey().getPoint());
+      MapTile to = mapTileGrid.get(waterConnection.getValue().getPoint());
+      Line line = new Line();
+      line.setStartX(from.getTranslateX());
+      line.setStartY(from.getTranslateY());
+      line.setEndX(to.getTranslateX());
+      line.setEndY(to.getTranslateY());
+      line.setStrokeWidth(2);
+      line.setStroke(UIUtil.alpha(edu.uph.learn.maharadja.common.Color.VOLCANIC_BLACK, 0.5));
+      line.getStrokeDashArray().addAll(10.0, 5.0);
+      hexGroup.getChildren().add(line);
+      line.toFront();
+      from.toFront();
+      to.toFront();
     }
   }
 

@@ -101,8 +101,8 @@
         { "q": 10, "r": 1, "name": "Manila" },
         { "q": 11, "r": 2, "name": "Cebu" },
         { "q": 12, "r": 2, "name": "Leyte" },
-        { "q": 9, "r": 3, "name": "Palawan" },
-        { "q": 11, "r": 3, "name": "Davao" }
+        { "q": 9, "r": 3, "name": "Palawan", "adjacentTo": ["Cebu", "Davao", "Berune"] },
+        { "q": 11, "r": 3, "name": "Davao", "adjacentTo": ["Gorontalo", "Ternate"] }
       ]
     },
     {
@@ -110,12 +110,12 @@
       "bonusTroops": 3,
       "color": "CADET_BLUE",
       "territories": [
-        { "q": 17, "r": 5, "name": "Biak" },
-        { "q": 16, "r": 6, "name": "Sorong", "adjacentTo": ["Biak", "Ternate"] },
-        { "q": 19, "r": 6, "name": "Jayapura", "adjacentTo": ["Biak"] },
-        { "q": 16, "r": 7, "name": "Fakfak", "adjacentTo": ["Biak"] },
-        { "q": 17, "r": 7, "name": "Timika", "adjacentTo": ["Biak"] },
-        { "q": 18, "r": 7, "name": "Merauke", "adjacentTo": ["Biak"]}
+        { "q": 17, "r": 5, "name": "Biak", "adjacentTo": ["Ternate", "Jayapura"] },
+        { "q": 16, "r": 6, "name": "Sorong", "adjacentTo": ["Ternate"] },
+        { "q": 19, "r": 6, "name": "Jayapura", "adjacentTo": [] },
+        { "q": 16, "r": 7, "name": "Fakfak", "adjacentTo": [] },
+        { "q": 17, "r": 7, "name": "Timika", "adjacentTo": [] },
+        { "q": 18, "r": 7, "name": "Merauke", "adjacentTo": [] }
       ]
     }
   ]

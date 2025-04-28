@@ -1,6 +1,7 @@
 package edu.uph.learn.maharadja.map;
 
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +42,7 @@ public class GameMap {
   final List<Region> regionList;
   final List<Territory> territoryList;
   final Map<Territory, Set<Territory>> adjacencyList;
+  final Set<Pair<Territory, Territory>> waterConnections;
 
   public GameMap() {
     this(0, 0, "HEX");
@@ -54,6 +56,7 @@ public class GameMap {
     this.regionList = new ArrayList<>();
     this.territoryList = new ArrayList<>();
     this.adjacencyList = new HashMap<>();
+    this.waterConnections = new HashSet<>();
   }
 
   //region should only be used by GameMapLoader
@@ -90,6 +93,19 @@ public class GameMap {
     addTerritory(destination);
     adjacencyList.get(origin).add(destination);
     adjacencyList.get(destination).add(origin);
+    if ("HEX".equals(tile) && !isDirectNeighobrs(origin, destination)) {
+      waterConnections.add(new Pair<>(origin, destination));
+    }
+  }
+
+  boolean isDirectNeighobrs(Territory origin, Territory destination) {
+    int[][] directions = AXIAL_NEIGHBORS[origin.getR() % 2];
+    for (int[] direction : directions) {
+      if (origin.getQ() + direction[0] == destination.getQ() && origin.getR() + direction[1] == destination.getR()) {
+        return true;
+      }
+    }
+    return false;
   }
   //endregion
 
@@ -99,6 +115,10 @@ public class GameMap {
 
   public int getR() {
     return r;
+  }
+
+  public Set<Pair<Territory, Territory>> getWaterConnections() {
+    return Set.copyOf(waterConnections);
   }
 
   public Map<Point2D, Territory> getTerritoryMap() {
