@@ -110,7 +110,7 @@ public class ActionPane extends BorderPane {
     HBox hbox = new HBox(UI.UNIT);
     HBox.setHgrow(form.getEndButton(), Priority.ALWAYS);
     HBox.setHgrow(form.getSubmitButton(), Priority.ALWAYS);
-    hbox.getChildren().addAll(form.getSubmitButton(), form.getEndButton());
+    hbox.getChildren().addAll(form.getEndButton(), form.getSubmitButton());
     setBottom(hbox);
     form.setVisible(true);
   }
