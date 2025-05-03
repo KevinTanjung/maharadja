@@ -108,8 +108,8 @@ public class ActionPane extends BorderPane {
   private void renderEndableActionForm(EndableActionForm form) {
     setCenter(form);
     HBox hbox = new HBox(UI.UNIT);
-    HBox.setHgrow(form.getSubmitButton(), Priority.ALWAYS);
     HBox.setHgrow(form.getEndButton(), Priority.ALWAYS);
+    HBox.setHgrow(form.getSubmitButton(), Priority.ALWAYS);
     hbox.getChildren().addAll(form.getSubmitButton(), form.getEndButton());
     setBottom(hbox);
     form.setVisible(true);

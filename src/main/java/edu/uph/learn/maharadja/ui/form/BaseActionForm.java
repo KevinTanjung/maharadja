@@ -17,6 +17,11 @@ public abstract class BaseActionForm extends ScrollPane {
   }
 
   protected Button renderButton(String label) {
-    return ButtonFactory.square(label, UI.EXTRA_LARGE, Color.IVORY_WHITE, Color.VOLCANIC_BLACK);
+    return ButtonFactory.square(
+        label,
+        UI.EXTRA_LARGE,
+        Color.IVORY_WHITE,
+        Color.VOLCANIC_BLACK
+    );
   }
 }
